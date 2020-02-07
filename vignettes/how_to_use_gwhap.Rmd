@@ -17,3 +17,10 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(gwhap)
 ```
+
+## Installation of `fcuk`
+
+```R
+if (!require(devtools)){install.packages("devtools")}
+devtools::install_github("yasmina-mekki/gwhap")
+```

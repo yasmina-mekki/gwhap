@@ -2,10 +2,14 @@ Package: gwhap
 Title: Genome wide haplotype
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Yasmina",
+    c(person(given = "Yasmina",
            family = "Mekki",
            role = c("aut", "cre"),
-           email = "yasmina.mekki@cea.fr")
+           email = "yasmina.mekki@cea.fr"),
+     person(given = "Slim",
+           family = "Karkar",
+           role = c("aut"),
+           email = "slim.karkar@cea.fr"))
 Description: What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
@@ -14,3 +18,9 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+RoxygenNote: 7.0.2
+Imports: 
+    data.table,
+    readr,
+    stats,
+    ggplot2
