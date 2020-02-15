@@ -2,14 +2,15 @@
 #'
 #' @param genetic_map_path i.e. rutgers map
 #' @param to_be_updated_genetic_map_path the genetic map that you want to update
+#' @param delim  character used to separate fields within a record. By default tab separated values is used
 #'
 #' @return a genetic map updated
 #' @import data.table
 #' @import readr
 #' @export
-genetic_map_update <- function(genetic_map_path, to_be_updated_genetic_map_path){
+genetic_map_update <- function(genetic_map_path, to_be_updated_genetic_map_path, delim='\t'){
 
-  snp_list = read_csv(to_be_updated_genetic_map_path, col_names=c('chromosome', 'snp', 'bp'))
+  snp_list = read_delim(to_be_updated_genetic_map_path, delim='\t', col_names=c('chromosome', 'snp', 'bp'))
   gen_map_updated = data.frame()
 
   for (chr in unique(snp_list[,1])){
