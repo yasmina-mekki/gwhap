@@ -10,7 +10,7 @@
 #' @export
 genetic_map_update <- function(genetic_map_path, to_be_updated_genetic_map_path, delim='\t'){
 
-  snp_list = read_delim(to_be_updated_genetic_map_path, delim='\t', col_names=c('chromosome', 'snp', 'bp'))
+  snp_list = read_delim(to_be_updated_genetic_map_path, delim=delim, col_names=c('chromosome', 'snp', 'bp'))
   gen_map_updated = data.frame()
 
   for (chr in unique(snp_list[,1])){
