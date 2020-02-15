@@ -27,6 +27,15 @@ haplotype_block_distribution <- function(){
 }
 
 
+#' karyotype plot
+#'
+#' @return ggplot
+#' @export
+karyotype_plot <- function(){
+
+}
+
+
 #_________________________
 # utils. Not in the right place
 #_________________________
