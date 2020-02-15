@@ -18,11 +18,15 @@ phenotype_distribution <- function(phenotypes_path){
 }
 
 
+
 #' haplotype block distribution
 #'
+#' @param df_blocs
+#'
 #' @return ggplot
+#' @import ggplot2
 #' @export
-haplotype_block_distribution <- function(){
+haplotype_block_distribution <- function(df_blocs){
 
 }
 
@@ -40,12 +44,13 @@ karyotype_plot <- function(){
 # utils. Not in the right place
 #_________________________
 
-#' save plot
+#' Save plot
 #'
-#' @param plot the plot to save
+#' @param plot the ggplot object
+#' @param output the path indicating where to save the plot
 #'
-#' @return NONE
+#' @return None
 #' @export
-save_plot <- function(plot){
-  # ggsave("myplot.pdf")
+save_plot <- function(plot, output){
+  ggsave(output)
 }
