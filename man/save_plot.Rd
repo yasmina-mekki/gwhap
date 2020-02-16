@@ -2,16 +2,18 @@
 % Please edit documentation in R/plotting.R
 \name{save_plot}
 \alias{save_plot}
-\title{save plot}
+\title{Save plot}
 \usage{
-save_plot(plot)
+save_plot(plot, output)
 }
 \arguments{
-\item{plot}{the plot to save}
+\item{plot}{the ggplot object}
+
+\item{output}{the path indicating where to save the plot}
 }
 \value{
-NONE
+None
 }
 \description{
-save plot
+Save plot
 }

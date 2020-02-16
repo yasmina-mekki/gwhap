@@ -4,12 +4,18 @@
 \alias{genetic_map_update}
 \title{update the genetic map}
 \usage{
-genetic_map_update(genetic_map_path, to_be_updated_genetic_map_path)
+genetic_map_update(
+  genetic_map_path,
+  to_be_updated_genetic_map_path,
+  delim = "\\t"
+)
 }
 \arguments{
 \item{genetic_map_path}{i.e. rutgers map}
 
 \item{to_be_updated_genetic_map_path}{the genetic map that you want to update}
+
+\item{delim}{character used to separate fields within a record. By default tab separated values is used}
 }
 \value{
 a genetic map updated

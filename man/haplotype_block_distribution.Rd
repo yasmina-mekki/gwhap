@@ -4,7 +4,24 @@
 \alias{haplotype_block_distribution}
 \title{haplotype block distribution}
 \usage{
-haplotype_block_distribution()
+haplotype_block_distribution(
+  df_blocs,
+  xlim = NULL,
+  ylim = NULL,
+  alpha = 0.1,
+  per_chromosome = FALSE
+)
+}
+\arguments{
+\item{df_blocs}{blocs}
+
+\item{xlim}{range of the x axe}
+
+\item{ylim}{range of the y axe}
+
+\item{alpha}{alpha}
+
+\item{per_chromosome}{if the distribution are grouped by chromosome or not. By default FALSE.}
 }
 \value{
 ggplot
