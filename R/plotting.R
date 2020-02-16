@@ -30,8 +30,12 @@ phenotype_distribution <- function(phenotypes_path){
 #'
 #' @return ggplot
 #' @importFrom magrittr %>%
+#' @importFrom dplyr mutate
 #' @export
 haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0.1, per_chromosome=FALSE){
+  # TO DO
+  # to_cm-from_cm same as win_size ?
+
   factor = df_blocs$delta
   if(per_chromosome){factor = df_blocs$chr}
 
