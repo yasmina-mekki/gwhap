@@ -29,6 +29,7 @@ phenotype_distribution <- function(phenotypes_path){
 #' @param per_chromosome if the distribution are grouped by chromosome or not. By default FALSE.
 #'
 #' @return ggplot
+#' @importFrom magrittr %>%
 #' @export
 haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0.1, per_chromosome=FALSE){
   factor = df_blocs$delta
@@ -48,8 +49,9 @@ haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0
 #'
 #' @param df_blocs data.frame
 #' @param colors colors
-#' @import karyoploteR
+#'
 #' @return karyotype plot object
+#' @import karyoploteR
 #' @export
 karyotype_plot <- function(df_blocs, colors=NULL){
   # TO DO
