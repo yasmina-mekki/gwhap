@@ -52,7 +52,7 @@ haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0
 #' Genome coverage of haplotype blocs
 #'
 #' @param df_blocs data.frame
-#' @param colors colors
+#' @param colors colors (int)
 #'
 #' @return karyotype plot object
 #' @import karyoploteR
