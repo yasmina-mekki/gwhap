@@ -6,7 +6,7 @@
 #' @import ggplot2
 #' @import readr
 #' @export
-phenotype_distribution <- function(phenotypes_path){
+phenotype_distribution <- function(phenotypes_path, alpha=0.4){
 
   phenotypes_df =  data.frame()
   for(path in phenotypes_path){
@@ -14,7 +14,7 @@ phenotype_distribution <- function(phenotypes_path){
     phenotype_file$phenotype_name = strsplit(basename(path), "\\.")[[1]][1]
     phenotypes_df <- rbind(phenotypes_df, phenotype_file)
   }
-  return(ggplot(phenotypes_df, aes(x=connectivity, fill=phenotype_name)) + geom_density(alpha = 0.4))
+  return(ggplot(phenotypes_df, aes(x=connectivity, fill=phenotype_name)) + geom_density(alpha = alpha))
 }
 
 
