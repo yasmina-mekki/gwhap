@@ -4,7 +4,7 @@
 \alias{phenotype_distribution}
 \title{phenotype distribution}
 \usage{
-phenotype_distribution(phenotypes_path)
+phenotype_distribution(phenotypes_path, alpha = 0.4)
 }
 \arguments{
 \item{phenotypes_path}{list of phenotypes path}
