@@ -18,9 +18,80 @@ knitr::opts_chunk$set(
 library(gwhap)
 ```
 
-## Installation of `fcuk`
+## Installation of `gwhap`
 
 ```R
 if (!require(devtools)){install.packages("devtools")}
 devtools::install_github("yasmina-mekki/gwhap")
 ```
+
+
+## Analysis
+
+### Part 1 : Update the genetic map, create the blocs and visualise them
+
+
+Update the genetic map
+```R
+to_be_updated_genetic_map_path = "path_to_your_snps_file/snp_file.txt"
+rutgers_map = "path_to_your_rutgers_map"
+gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
+```
+
+Create blocs
+```R
+df_blocks = create_blocks(gen_map_updated, delta=1e-3)
+```
+
+Create blocs with multiple values of delta
+```R
+deltas = c(1e-3, 2.5e-3, 5e-3, 7.5e-3)
+dfs_blocks = data.frame()
+for(delta in deltas){
+  df_blocks_tmp = create_blocks(genetics_map=gen_map_updated, delta=delta)
+  dfs_blocks <- rbind(dfs_blocks, df_blocks_tmp)
+}
+```
+
+Block distribution plot
+
+* All chromosomes
+```
+haplotype_block_distribution_per_delta = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5))
+print(haplotype_block_distribution_per_delta)
+save_plot(haplotype_block_distribution_per_delta, paste0(output, 'haplotype_block_distribution_per_delta.pdf'))
+```
+
+* Per chromosome
+```R
+haplotype_block_distribution_per_chr = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5), per_chromosome=TRUE)
+print(haplotype_block_distribution_per_chr)
+save_plot(haplotype_block_distribution_per_chr, paste0(output, 'haplotype_block_distribution_per_chr.pdf'))
+```
+
+* Karyotype
+```R
+df_blocs_delta_3 = dfs_blocks[dfs_blocks$delta==0.001,]
+karyotype_plot_obj = karyotype_plot(df_blocs_delta_3)
+save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
+```
+
+
+### Part 2 : Determine the haplotypes
+
+
+
+
+### Part x : Phenotypes distribution plots
+
+
+Phenotypes distribution plots
+```R
+phenotypes_path = Sys.glob(file.path("path_to_your_phenotypes/" , '*'))
+phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotypes_path)
+print(phenotype_distribution_plot)
+save_plot(phenotype_distribution_plot, paste0(output, 'phenotype_distribution_plot.pdf'))
+```
+
+
+
