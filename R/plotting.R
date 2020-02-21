@@ -40,7 +40,7 @@ haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0
   if(per_chromosome){factor = df_blocs$chr}
 
   haplotype_block_distribution_plot <- ggplot(df_blocs%>% mutate(lh=to_cm-from_cm), aes(x=lh, fill=factor(factor))) +
-    geom_density(alpha=alpha) + labs(fill = "δ(cM)")
+    geom_density(alpha=alpha) + labs(fill = "delta (cM)")
   if(!is.null(xlim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + xlim(xlim[1], xlim[2])}
   if(!is.null(ylim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + ylim(ylim[1], ylim[2])}
   if(per_chromosome){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + facet_grid(rows=vars(delta), scale="free")}
