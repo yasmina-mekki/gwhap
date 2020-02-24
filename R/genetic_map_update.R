@@ -19,7 +19,7 @@ genetic_map_update <- function(genetic_map_path, to_be_updated_genetic_map_path,
     interp_in = chr_map$Build37_start_physical_position > (min(snp_list$bp[snp_list$chromosome == chr])-1) &
       chr_map$Build37_start_physical_position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
-    gen_map_approx.fun <- approxfun(chr_map$Build37_start_physical_position[interp_in],
+    gen_map_approx.fun <- stats::approxfun(chr_map$Build37_start_physical_position[interp_in],
                                     chr_map$Sex_averaged_start_map_position[interp_in],
                                     ties="ordered")
 

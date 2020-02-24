@@ -1,6 +1,11 @@
 ---
-title: "how_to_use_gwhap"
-output: rmarkdown::html_vignette
+title: "How to use gwhap package"
+output: 
+  BiocStyle::html_document:
+    toc: true
+author:
+  - name : "Yasmina Mekki (yasmina.mekki@cea.fr)"
+  - name : "Slim Karkar (slim.karkar@cea.fr)"
 vignette: >
   %\VignetteIndexEntry{how_to_use_gwhap}
   %\VignetteEngine{knitr::rmarkdown}
@@ -18,7 +23,7 @@ knitr::opts_chunk$set(
 library(gwhap)
 ```
 
-## Installation of `gwhap`
+# Installation of `gwhap`
 
 ```R
 if (!require(devtools)){install.packages("devtools")}
@@ -26,9 +31,9 @@ devtools::install_github("yasmina-mekki/gwhap")
 ```
 
 
-## Analysis
+# Analysis
 
-### Part 1 : Update the genetic map, create the blocs and visualise them
+## Part 1 : Update the genetic map, create the blocs and visualise them
 
 
 Update the genetic map
@@ -77,12 +82,12 @@ save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
 ```
 
 
-### Part 2 : Determine the haplotypes
+## Part 2 : Determine the haplotypes
 
 
 
 
-### Part x : Phenotypes distribution plots
+## Part x : Phenotypes distribution plots
 
 
 Phenotypes distribution plots
