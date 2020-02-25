@@ -1,0 +1,43 @@
+---
+title: "Resources to use gwhap"
+output: 
+  BiocStyle::html_document:
+    toc: true
+author:
+  - name : "Slim Karkar (slim.karkar@cea.fr)"
+  - name : "Yasmina Mekki (yasmina.mekki@cea.fr)"
+vignette: >
+  %\VignetteIndexEntry{how_to_use_gwhap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+RESOURCE_ROOT="<YOUR_LOCAL_RESOURCE_FS>"
+```
+
+
+
+
+# Genetic maps
+
+## Definition
+
+## Rutgers genetic maps
+
+This map is available as ascii files from [https://rutgers.]. Get and install a version in "rugers_map_v3" directory
+```{r setup}
+RUTGERS_GENMAP=file.path(RESOURCE_ROOT, "rutgers_map_v3")
+dir(RUTGERS_GENMAP)
+```
+
+# Definition of a genomic region of study
+
+# Remarks about the phased data
