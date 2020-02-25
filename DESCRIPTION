@@ -23,4 +23,9 @@ Imports:
     data.table,
     readr,
     stats,
-    ggplot2
+    ggplot2,
+    dplyr,
+    magrittr,
+    karyoploteR,
+    datasets,
+    grDevices

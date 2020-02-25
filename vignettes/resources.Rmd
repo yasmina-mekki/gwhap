@@ -7,7 +7,7 @@ author:
   - name : "Slim Karkar (slim.karkar@cea.fr)"
   - name : "Yasmina Mekki (yasmina.mekki@cea.fr)"
 vignette: >
-  %\VignetteIndexEntry{how_to_use_gwhap}
+  %\VignetteIndexEntry{Resources_to_use_gwhap}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
-RESOURCE_ROOT="<YOUR_LOCAL_RESOURCE_FS>"
+RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 ```
 
 
@@ -34,9 +34,39 @@ RESOURCE_ROOT="<YOUR_LOCAL_RESOURCE_FS>"
 
 This map is available as ascii files from [https://rutgers.]. Get and install a version in "rugers_map_v3" directory
 ```{r setup}
-RUTGERS_GENMAP=file.path(RESOURCE_ROOT, "rutgers_map_v3")
+RUTGERS_GENMAP = file.path(RESOURCE_ROOT, "rutgers_map_v3")
 dir(RUTGERS_GENMAP)
 ```
+
+## Imputed genotype data
+
+Two types of format are available : bed/bim/fam and bgen format.
+```{r}
+IMP_GENOTYPE_DATA = file.path(RESOURCE_ROOT, "imputed_data.bim")
+```
+Or :
+```{r}
+IMP_GENOTYPE_DATA = file.path(RESOURCE_ROOT, "imputed_data.bgen")
+dir(IMP_GENOTYPE_DATA)
+```
+
+## Haplotypes
+
+The phased haplotypes in BGEN format.
+
+For the UKB cohorts, the phased haplotypes are available for each chromosome separatly.
+Three files are needed :
+* .bgen :
+* .bgi :
+* .sample : The sample file lists the order of the samples in the .bgen files
+
+Please refer to this <a href="https://bitbucket.org/gavinband/bgen/wiki/BGEN_in_the_UK_Biobank">wiki</a> for more details.
+
+```{r}
+HAPLOTYPES = file.path(RESOURCE_ROOT, "HAPLOTYPES/ukb_hap_chr<chr>_v2.bgen")
+dir(HAPLOTYPES)
+```
+
 
 # Definition of a genomic region of study
 
