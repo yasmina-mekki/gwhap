@@ -1,11 +1,9 @@
 ---
 title: "Resources to use gwhap"
 output: 
+  #rmarkdown::html_vignette:
   BiocStyle::html_document:
     toc: true
-author:
-  - name : "Slim Karkar (slim.karkar@cea.fr)"
-  - name : "Yasmina Mekki (yasmina.mekki@cea.fr)"
 vignette: >
   %\VignetteIndexEntry{Resources_to_use_gwhap}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,6 +22,16 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 ```
 
 
+# TO DO
+
+* Différence au niveau des maps rutgers sur le site et celle sur /neurospin/brainomics/bio_resources
+  * La version téléchargé via ce <a href="http://compgen.rutgers.edu/downloads/rutgers_map_v3.zip">lien</a> est de 1.7 Go.
+  * La version sur /neurospin/brainomics/bio_resources/rutgers_map_v3 est de 5.7 Go.
+  * ===> Pas la bonne map à télécharger ?
+  
+* Phased data section
+  * En quoi consiste les phased data
+  * Comment phaser les datas
 
 
 # Genetic maps
@@ -32,30 +40,66 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 
 ## Rutgers genetic maps
 
-This map is available as ascii files from [https://rutgers.]. Get and install a version in "rugers_map_v3" directory
+<a href="http://compgen.rutgers.edu/rutgers_maps.shtml">The Rutgers Combined Linkage-Physical Map</a> is a high-resolution genetic map that contains interpolated genetic positions for variants from dbSNP ...
+
+The Latest release of Rutgers Map v.3 (June 2012) includes the interpolated positions (Kosambi) of dbSNP Build 137 reference SNPs and UniSTS markers from Build 37.3 (GRCh37 patch 5).
+
+This map is available as ascii files from <a href="http://compgen.rutgers.edu/downloads/rutgers_map_v3.zip">this link</a>. Get and install a version in "rugers_map_v3" directory.
+
 ```{r setup}
 RUTGERS_GENMAP = file.path(RESOURCE_ROOT, "rutgers_map_v3")
 dir(RUTGERS_GENMAP)
 ```
 
-## Imputed genotype data
+You can download it using the gwhap package as well. Please refer to the 'How to use gwhap package' vignette for more details.
 
-Two types of format are available : bed/bim/fam and bgen format.
+
+# Definition of a genomic region of study
+
+The update of the genetic map (Rutgers or any other) add new chromosomic position for which the recombination rate is estimated (interpolated) from the existing map.
+
+The positions where the values are interpolated are given by a bim file or a bgen file. This is just to specify the list of location where potential values of recombination have to be interpolated.
+
+Remarks: in the package a file named data/small_region.bim is given for example. Usually the plink/bim file of the genetic data is used for the haplotype study.
+
+
 ```{r}
-IMP_GENOTYPE_DATA = file.path(RESOURCE_ROOT, "imputed_data.bim")
-```
-Or :
-```{r}
-IMP_GENOTYPE_DATA = file.path(RESOURCE_ROOT, "imputed_data.bgen")
-dir(IMP_GENOTYPE_DATA)
+GENOTYPE_DATA = file.path(RESOURCE_ROOT, "small_region.bim")
+dir(GENOTYPE_DATA)
 ```
 
-## Haplotypes
+
+## Necessary fields when a bim file is used
+A text file with no header line, and one line per variant with the following three fields:
+
+* Chromosome code or name
+* Variant identifier
+* Base-pair coordinate
+
+The following table illutrate an example of a .bim file. The headers were added for more clarity.
+
+| Chromosome | Variant ID   | Base-pair coordinate |
+| :--------: | :----------: | :-----------------:  |
+|     14     | rs58082782   | 59026166             |
+|     14     | rs7155836    | 59028006             |
+|     14     | rs113397864  | 59034994             |
+|     14     | rs76924950   | 59037440             |
+|     14     | rs386777953  | 59039893             |
+
+	
+
+
+## Necessary fields when a bgne file is used
+
+# Remarks about the phased data
+
+**working in progress**
 
 The phased haplotypes in BGEN format.
 
 For the UKB cohorts, the phased haplotypes are available for each chromosome separatly.
 Three files are needed :
+
 * .bgen :
 * .bgi :
 * .sample : The sample file lists the order of the samples in the .bgen files
@@ -66,8 +110,3 @@ Please refer to this <a href="https://bitbucket.org/gavinband/bgen/wiki/BGEN_in_
 HAPLOTYPES = file.path(RESOURCE_ROOT, "HAPLOTYPES/ukb_hap_chr<chr>_v2.bgen")
 dir(HAPLOTYPES)
 ```
-
-
-# Definition of a genomic region of study
-
-# Remarks about the phased data

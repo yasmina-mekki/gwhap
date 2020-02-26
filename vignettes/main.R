@@ -7,7 +7,7 @@ library(dplyr)
 
 # results folder
 output = './results/'
-
+RESOURCE_ROOT='/neurospin/brainomics/bio_resources'
 
 #_____________________________________________________________
 # Part 1
@@ -15,9 +15,9 @@ output = './results/'
 #_____________________________________________________________
 
 # Update the genetic map
-to_be_updated_genetic_map_path = "./data/imp_dact1.txt"
-rutgers_map = "./data/rutgers_map"
-gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
+to_be_updated_genetic_map_path = "./data/small_region_imputed.bim"
+rutgers_map = file.path(RESOURCE_ROOT,"rutgers_map_v3")
+gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, snp_physical_positions=to_be_updated_genetic_map_path)
 
 # Create blocs
 df_blocks = create_blocks(gen_map_updated, delta=1e-3)

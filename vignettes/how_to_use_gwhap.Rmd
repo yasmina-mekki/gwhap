@@ -1,11 +1,9 @@
 ---
 title: "How to use gwhap package"
-output: 
+output:
+  #rmarkdown::html_vignette:
   BiocStyle::html_document:
     toc: true
-author:
-  - name : "Yasmina Mekki (yasmina.mekki@cea.fr)"
-  - name : "Slim Karkar (slim.karkar@cea.fr)"
 vignette: >
   %\VignetteIndexEntry{how_to_use_gwhap}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,7 +19,10 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(gwhap)
+
+RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 ```
+
 
 # Installation of `gwhap`
 
@@ -30,11 +31,15 @@ if (!require(devtools)){install.packages("devtools")}
 devtools::install_github("yasmina-mekki/gwhap")
 ```
 
+# Download the Rutgers genetic map
 
-# Analysis
+Download the Rutgers genetic map v3 (Kosambi)
+```R
+download_rutgers_map(RESOURCE_ROOT)
+```
 
-## Part 1 : Update the genetic map, create the blocs and visualise them
 
+# Create the augmented genetic map
 
 Update the genetic map
 ```R
@@ -43,7 +48,11 @@ rutgers_map = "path_to_your_rutgers_map"
 gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
 ```
 
-Create blocs
+# Blocs creation
+
+## Create the blocs
+
+Create blocs with a single delta
 ```R
 df_blocks = create_blocks(gen_map_updated, delta=1e-3)
 ```
@@ -58,7 +67,9 @@ for(delta in deltas){
 }
 ```
 
-Block distribution plot
+##  Blocs visualization
+
+Blocs distribution plot
 
 * All chromosomes
 ```
@@ -74,7 +85,7 @@ print(haplotype_block_distribution_per_chr)
 save_plot(haplotype_block_distribution_per_chr, paste0(output, 'haplotype_block_distribution_per_chr.pdf'))
 ```
 
-* Karyotype
+Karyotype
 ```R
 df_blocs_delta_3 = dfs_blocks[dfs_blocks$delta==0.001,]
 karyotype_plot_obj = karyotype_plot(df_blocs_delta_3)
@@ -82,15 +93,15 @@ save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
 ```
 
 
-## Part 2 : Determine the haplotypes
+# Determine the haplotypes
 
 
 
 
-## Part x : Phenotypes distribution plots
-
+# Phenotypes distribution plots
 
 Phenotypes distribution plots
+
 ```R
 phenotypes_path = Sys.glob(file.path("path_to_your_phenotypes/" , '*'))
 phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotypes_path)
