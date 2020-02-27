@@ -37,7 +37,16 @@ read.augmented_genetic_map <- function(genetic_map_dir, snp_physical_positions){
   return(gen_map_updated)
 }
 
-
+#' load the rutgers map to a gen_map dataframe [chr,rsid,BP,cM]
+#'
+#' @param genetic_map_dir path to rutgers map
+#' @param chromosome the list of chomosomee to load update
+#' @param delim  character used to separate fields within a record. By default tab separated values is used
+#'
+#' @return a genetic map
+#' @import data.table
+#' @import readr
+#' @export
 read.genetic_map <- function(genetic_map_dir, chromosomes=1:23) {
 
   gen_map = list()
@@ -47,12 +56,15 @@ read.genetic_map <- function(genetic_map_dir, chromosomes=1:23) {
 
 
   for (chr in 1:23){
-    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))#use Sys.glob instead of specifying the path
+    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', #use Sys.glob instead of specifying the path
+                                      genetic_map_dir, chr))
 
-    gen_map[[chr]] = data.frame(cM=chr_map$Sex_averaged_start_map_position,
-                                  pos=chr_map$Build37_start_physical_position,
-                                  rsid=chr_map$Marker_name,
-                                  chr=chr)
+    gen_map[[chr]] = data.frame(chr=chr,
+                                rsid=chr_map$Marker_name,
+                                BP=chr_map$Build37_start_physical_position,
+                                cM=chr_map$Sex_averaged_start_map_position)
+
+
   }
 
   return(gen_map)
