@@ -77,10 +77,11 @@ download_rutgers_map(RESOURCE_ROOT)
 ```
 
 interpolate a new map for SNPs in snp_file.txt
-```{r}
+```R
 to_be_updated_genetic_map_path = "path_to_your_snps_file/snp_file.txt"
 rutgers_map = "path_to_your_rutgers_map"
-gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
+gen_map_updated = read.augmented_genetic_map(genetic_map_path=rutgers_map,
+                                            to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
 ```
 
 # Blocs creation

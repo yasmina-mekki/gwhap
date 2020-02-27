@@ -2,6 +2,8 @@
 
 export(genetic_map_interp)
 export(genetic_map_interp_chr)
+export(read.genetic_map)
+export(read.augmented_genetic_map)
 export(create_blocks)
 export(download_rutgers_map)
 export(get_rutgers_map)
