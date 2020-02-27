@@ -33,6 +33,59 @@ read.augmented_genetic_map <- function(genetic_map_dir, snp_physical_positions){
     gen_map_updated[[chr]]  = data.frame(cM=snp_interp, pos=snp_list$bp, rsid=snp_list$snp, chr=chr)
   }
 
+
+#' use and interpolate genetic map of a chromosome
+#'
+#' @param genetic_map  reference genetic map of a chromosome [BP,cM]
+#' @param snp_list SNP position list to interpolate [BP]
+#'
+#' @return gen_map_chr_interp : genetic map for the SNP list : [BP,cM]
+#' @export
+genetic_map_interp_chr <- function(genetic_map, snp_list){
+
+    #builiding the interpolation model using all reference positions in chromosome chr
+    gen_map_approx.fun <- stats::approxfun(genetic_map[,1],
+                                           genetic_map[,2],
+                                           ties="ordered")
+    #snps to interpolate in the chromosome chr
+    snp_interp = gen_map_approx.fun(snp_list)
+
+    # update the genetic map
+    gen_map_chr_interp = data.frame(pos=snp_list,
+                                cM=snp_interp)
+
+
+  return(gen_map_chr_interp)
+}
+
+
+#' use and interpolate of all chromosomes using a reference map  object
+#'
+#' @param genetic_map_all  reference genetic map of all chromosomes [chr,BP,cM]
+#' @param snp_list SNP position list to interpolate in all chromosomes [chr,BP]
+#'
+#' @return gen_map_allchr_interp : genetic map for the SNP list : [chr,BP,cM]
+#' @export
+genetic_map_interp <- function(genetic_map_all, snp_list){
+  gen_map_allchr_interp=c()
+  #loop over all chr in the snp list
+  for (chr in unique(snp_list[,1])){
+    map_in=genetic_map_all[,1]==chr
+    genetic_map=genetic_map_all[map_in,c(2,3)]
+    snps_in=snp_list[,1]==chr
+    snps_to_interp= snp_list[snps_in,2]
+
+    # adding interpolation for chomosome chr to resulting map gen_map_allchr_interp
+    gen_map_allchr_interp=rbind(gen_map_allchr_interp,
+                                data.frame(chr=chr,
+                                           genetic_map_interp_chr(genetic_map = genetic_map,
+                                                                  snp_list = snps_to_interp)))
+
+  }
+  return(gen_map_allchr_interp)
+
+}
+
   return(gen_map_updated)
 }
 
