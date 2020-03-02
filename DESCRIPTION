@@ -31,4 +31,6 @@ Imports:
     grDevices,
     DBI,
     utils,
-    tools
+    tools,
+    rbgen,
+    dummies

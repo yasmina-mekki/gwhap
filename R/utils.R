@@ -74,6 +74,28 @@ get_bgi_file <- function(file_path){
   return(bgi_dataframe)
 }
 
+#' get bgen file
+#' Need to handle when samples are not specifyed ...
+#'
+#' @param file_path A path to a .bgen file
+#' @param start the start genomic position
+#' @param end the end genomic position
+#' @param chromosome String. The chromosome code. '' by default
+#' @param max_entries_per_sample An integer specifying the maximum number of probabilities expected per variant per sample.
+#' This is used to set the third dimension of the data matrix returned. 4 by default.
+#' @param samples A character vector specifying the IDs of samples to load data for.
+#'
+#' @return
+#' @import rbgen
+#' @export
+#'
+get_bgen_file <- function(file_path, start, end, samples=samples, chromosome='', max_entries_per_sample=4){
+  return(bgen.load(filename=bgnfile,
+                   data.frame(chromosome=chromosome, start=start, end=end),
+                   samples = samples,
+                   max_entries_per_sample=max_entries_per_sample))
+}
+
 
 #' write genetic map
 #'

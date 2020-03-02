@@ -65,11 +65,12 @@ karyotype_plot <- function(df_blocs, colors=NULL){
   # TO DO
   # handle colors params
   # add scale bar
+  # issues here ...
 
   # params blocs setting
   df_blocs$lbp = df_blocs$to_bp - df_blocs$from_bp
   df_blocs$mb  = round(df_blocs$from_bp/1e6)
-  sum_l_bp_chr = df_blocs %>% group_by(df_blocs$chr, df_blocs$mb) %>% summarise(coverage=sum(df_blocs$lbp)/1e6)
+  sum_l_bp_chr = df_blocs %>% group_by(chr=df_blocs$chr, mb=df_blocs$mb) %>% summarise(coverage=sum(df_blocs$lbp)/1e6)
 
   # params plot setting
   pp <- getDefaultPlotParams(plot.type = 1)
