@@ -1,0 +1,74 @@
+---
+title: "What visualization are available into gwhap ?"
+output:
+  #rmarkdown::html_vignette:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{visualization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gwhap)
+
+RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
+```
+
+
+# Installation of `gwhap`
+
+```R
+if (!require(devtools)){install.packages("devtools")}
+devtools::install_github("yasmina-mekki/gwhap")
+```
+
+# TO DO
+* Add example of visualization for each section
+
+
+#  Blocs distribution plot
+
+All chromosomes
+```
+haplotype_block_distribution_per_delta = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5))
+print(haplotype_block_distribution_per_delta)
+save_plot(haplotype_block_distribution_per_delta, paste0(output, 'haplotype_block_distribution_per_delta.pdf'))
+```
+
+Per chromosome
+```R
+haplotype_block_distribution_per_chr = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5), per_chromosome=TRUE)
+print(haplotype_block_distribution_per_chr)
+save_plot(haplotype_block_distribution_per_chr, paste0(output, 'haplotype_block_distribution_per_chr.pdf'))
+```
+
+# Karyotype
+```R
+df_blocs_delta_3 = dfs_blocks[dfs_blocks$delta==0.001,]
+karyotype_plot_obj = karyotype_plot(df_blocs_delta_3)
+save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
+```
+
+# Genome wide test plots
+
+
+# Phenotypes distribution plots
+
+```R
+phenotypes_path = Sys.glob(file.path("path_to_your_phenotypes/" , '*'))
+phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotypes_path)
+print(phenotype_distribution_plot)
+save_plot(phenotype_distribution_plot, paste0(output, 'phenotype_distribution_plot.pdf'))
+```
+
+
+

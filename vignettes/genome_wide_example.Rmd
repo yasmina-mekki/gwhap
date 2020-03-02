@@ -1,0 +1,66 @@
+---
+title: "Genome wide example"
+output:
+  #rmarkdown::html_vignette:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{genome_wide_example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gwhap)
+
+RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
+```
+
+
+# Installation of `gwhap`
+
+```R
+if (!require(devtools)){install.packages("devtools")}
+devtools::install_github("yasmina-mekki/gwhap")
+```
+
+# Download the Rutgers genetic map
+
+Download the Rutgers genetic map v3 (Kosambi)
+```R
+download_rutgers_map(RESOURCE_ROOT)
+```
+
+
+# Create the augmented genetic map
+
+Create the augmented genetic map using the rutgers genetic map v3
+```R
+snp_physical_positions = "/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/v2/ukb_hap_"
+rutgers_map = "/neurospin/brainomics/bio_resources/rutgers_map_v3"
+output = '/neurospin/tmp/ymekki/new_repo/gwhap/augmented_genetic_map'
+create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=rutgers_map, save_genetic_map=TRUE, output=output)
+```
+
+# Blocs creation
+
+Create blocs with a single delta
+```R
+augmented_genetic_map_dir = '/neurospin/tmp/ymekki/new_repo/gwhap/augmented_genetic_map'
+output = '/neurospin/tmp/ymekki/new_repo/gwhap/blocs's
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir, chromosomes=1:23)
+df_blocks = create_blocks(augmented_map_df, delta=1e-3, save_blocs=TRUE, output=output)
+```
+
+# Determine the haplotypes
+
+
+
+

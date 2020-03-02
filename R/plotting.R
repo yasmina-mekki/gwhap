@@ -40,7 +40,7 @@ haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0
   factor = df_blocs$delta
   if(per_chromosome){factor = df_blocs$chr}
 
-  haplotype_block_distribution_plot <- ggplot(df_blocs%>% mutate(lh=df_blocs$to_cm-df_blocs$from_cm), aes(x=lh, fill=factor(factor))) +
+  haplotype_block_distribution_plot <- ggplot(df_blocs %>% mutate(lh=df_blocs$to_cm-df_blocs$from_cm), aes(x=lh, fill=factor(factor))) +
     geom_density(alpha=alpha) + labs(fill = "delta (cM)")
   if(!is.null(xlim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + xlim(xlim[1], xlim[2])}
   if(!is.null(ylim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + ylim(ylim[1], ylim[2])}
@@ -59,7 +59,7 @@ haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0
 #' @return karyotype plot object
 #' @import karyoploteR
 #' @importFrom grDevices rainbow
-#' @importFrom dplyr group_by
+#' @importFrom dplyr group_by summarise
 #' @export
 karyotype_plot <- function(df_blocs, colors=NULL){
   # TO DO
@@ -69,14 +69,14 @@ karyotype_plot <- function(df_blocs, colors=NULL){
   # params blocs setting
   df_blocs$lbp = df_blocs$to_bp - df_blocs$from_bp
   df_blocs$mb  = round(df_blocs$from_bp/1e6)
-  sum_l_bp_chr = df_blocs %>% group_by(df_blocs$chr, df_blocs$mb) %>% summarise(coverage=sum(lbp)/1e6)
+  sum_l_bp_chr = df_blocs %>% group_by(df_blocs$chr, df_blocs$mb) %>% summarise(coverage=sum(df_blocs$lbp)/1e6)
 
   # params plot setting
   pp <- getDefaultPlotParams(plot.type = 1)
   pp$data1height = 200
 
   # init karyotype object with params plot chosen above
-  karyotype_plot_obj <- plotKaryotype(chromosomes=c("autosomal"), plot.params = pp)
+  karyotype_plot_obj <- plotKaryotype(chromosomes=c('autosomal'), plot.params = pp)
 
   kpHeatmap(karyoplot = karyotype_plot_obj,
             chr       = sum_l_bp_chr$chr,

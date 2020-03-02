@@ -28,4 +28,7 @@ Imports:
     magrittr,
     karyoploteR,
     datasets,
-    grDevices
+    grDevices,
+    DBI,
+    utils,
+    tools

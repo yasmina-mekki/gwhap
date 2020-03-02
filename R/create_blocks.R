@@ -2,13 +2,15 @@
 #'
 #' @param genetics_map genetic map phasee
 #' @param delta delta
+#' @param save_blocs Boolean. specify if the created blocs should be saved. FALSE by default.
+#' @param output A path to a file where the created blocs will be saved.
 #'
-#' @return blocks
+#' @return if save_blocs == TRUE, then the created blocs are saved. Otherwise, it will return a list of dataframe.
 #' @export
-create_blocks <- function(genetics_map, delta=1e-3){
+create_blocks <- function(genetics_map, delta=1e-3, save_blocs=FALSE, output=''){
   # can and should improve the code !
 
-  bloc_df = c()
+  bloc_df = list()
 
   for (chr in unique(genetics_map$chr)){
 
@@ -34,7 +36,17 @@ create_blocks <- function(genetics_map, delta=1e-3){
     from_bp  = position[start_w]
     to_bp    = position[end_w]
     win_size = apply(data.frame(from_cm, to_cm), 1, diff)
-    bloc_df  = rbind(bloc_df, data.frame(start_w, end_w, win_size, from_bp, to_bp, from_cm, to_cm, chr, delta))
+
+    bloc_df[[chr]]  = data.frame(start_w, end_w, win_size, from_bp, to_bp, from_cm, to_cm, chr, delta)
   }
+
+  if (save_blocs) {
+    for (chr in unique(genetics_map$chr)){
+      file_path = sprintf('%s/blocs_chr%s.txt', output, chr)
+      write_blocs(bloc_df[[chr]], file_path)
+    }
+    return(0)
+  }
+  # if not save_blocs, return the blocs as a list of dataframe for each chromosome
   return(bloc_df)
 }

@@ -1,9 +1,9 @@
-if (!require(devtools)){install.packages("devtools")}
-devtools::install_github("yasmina-mekki/gwhap", force = TRUE)
 library(gwhap)
 
-# should not load dplyr from main !
-library(dplyr)
+#_____________________________________
+library(readr)
+#_____________________________________
+
 
 # results folder
 output = './results/'
@@ -15,9 +15,12 @@ RESOURCE_ROOT='/neurospin/brainomics/bio_resources'
 #_____________________________________________________________
 
 # Update the genetic map
-to_be_updated_genetic_map_path = "./data/small_region_imputed.bim"
+snp_physical_positions = "./data/small_region.bim"
 rutgers_map = file.path(RESOURCE_ROOT,"rutgers_map_v3")
-gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, snp_physical_positions=to_be_updated_genetic_map_path)
+gen_map_updated = create_augmented_genetic_map(snp_physical_positions=snp_physical_positions,
+                                               genetic_map_dir=rutgers_map,
+                                               save_genetic_map=FALSE,
+                                               output='/neurospin/tmp/ymekki/test')
 
 # Create blocs
 df_blocks = create_blocks(gen_map_updated, delta=1e-3)

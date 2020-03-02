@@ -17,17 +17,3 @@ download_rutgers_map <- function(){
   # remove the zip file
   system('rm rutgers_map_v3.zip')
 }
-
-#_________________________
-# Getteur part
-#_________________________
-
-#' get rutgers map
-#'
-#' @param file_path the location of the rutgers map
-#'
-#' @return the rutgers map in a data.table structure
-#' @export
-get_rutgers_map <- function(file_path){
-  return(suppressMessages(fread(file_path)))
-}

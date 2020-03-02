@@ -1,58 +1,72 @@
-#' update the genetic map
+#' create an augmented genetic map
 #'
-#' @param genetic_map_path i.e. rutgers map
-#' @param to_be_updated_genetic_map_path the genetic map that you want to update
-#' @param delim  character used to separate fields within a record. By default tab separated values is used
+#' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
+#' @param genetic_map_dir i.e. rutgers map
+#' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved. FALSE by default.
+#' @param output A path to a file where the augmented genetic map will be saved.
 #'
-#' @return a genetic map updated
+#' @return if save_genetic_map == TRUE, then the augmented genetic map is saved. Otherwise, it will return a list of dataframe.
 #' @import data.table
 #' @import readr
+#' @import tools
 #' @export
-read.augmented_genetic_map <- function(genetic_map_dir, snp_physical_positions){
+create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, save_genetic_map=FALSE, output=''){
 
-  snp_list = read_delim(snp_physical_positions, delim='\t', col_names=c('chromosome', 'snp', 'bp'))
-  gen_map_updated = list()
-  for (chr in unique(snp_list$chromosome)){
-    gen_map_updated[[chr]] = data.frame()
+  # read the snp physical positions
+
+  # read the one bim file for the whole autosome
+  if('bim'==file_ext(snp_physical_positions)){snp_list = get_bim_file(snp_physical_positions)}
+
+  # one bgi file per chromosome. read each one of them and concatenate them into one dataframe
+  else{
+    snp_list = c()
+    for (chr in 1:23){
+      bgi_file_path = sprintf('%schr%s_v2.bgen.bgi', snp_physical_positions, chr)
+      # check if file path exist
+      if(file.exists(bgi_file_path)){
+        # get bgi file
+        tmp = get_bgi_file(bgi_file_path)
+        # add chromosome code
+        tmp$chromosome = chr
+        # change column name for correspondance with bim file
+        colnames(tmp) <- c('chromosome', 'bp', 'snp', 'number_of_alleles', 'allele1', 'allele2', 'file_start_position', 'size_in_bytes')
+        # concatenation
+        snp_list  = rbind(snp_list, tmp)
+      }
+    }
   }
 
-  for (chr in unique(snp_list[,1])){
-    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr)) #use Sys.glob instead of specifying the path
+  # create the augmented genetic map
+  gen_map_updated = list()
+  for (chr in unique(snp_list$chromosome)){
 
+    # read the rutgers map
+    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr)) #use Sys.glob instead of specifying the path
     interp_in = chr_map$Build37_start_physical_position > (min(snp_list$bp[snp_list$chromosome == chr])-1) &
       chr_map$Build37_start_physical_position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
+    # perform the linear interpolation
     gen_map_approx.fun <- stats::approxfun(chr_map$Build37_start_physical_position[interp_in],
                                     chr_map$Sex_averaged_start_map_position[interp_in],
                                     ties="ordered")
 
+    # filter on the position, rsid and snp interpolation for the current chromosome
     snp_interp = gen_map_approx.fun(snp_list$bp[snp_list$chromosome == chr])
-    names(snp_interp) = snp_list$snp
+    position   = snp_list$bp[snp_list$chromosome == chr]
+    rsid       = snp_list$snp[snp_list$chromosome == chr]
 
-    # update the genetic map
-    gen_map_updated[[chr]]  = data.frame(cM=snp_interp, pos=snp_list$bp, rsid=snp_list$snp, chr=chr)
+    # store the augmented genetic map for each chromosome
+    gen_map_updated[[chr]]  = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
   }
 
+  # if save_genetic_map, write the augmented genetic map
+  if (save_genetic_map) {
+    for (chr in unique(snp_list$chromosome)){
+      file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
+      write_genetic_map(gen_map_updated[[chr]], file_path)
+    }
+    return(0)
+  }
+  # if not save_genetic_map, return the augmented genetic map as a list of dataframe
   return(gen_map_updated)
-}
-
-
-read.genetic_map <- function(genetic_map_dir, chromosomes=1:23) {
-
-  gen_map = list()
-  for (chr in chromosomes){
-    gen_map[[chr]] = data.frame()
-  }
-
-
-  for (chr in 1:23){
-    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))#use Sys.glob instead of specifying the path
-
-    gen_map[[chr]] = data.frame(cM=chr_map$Sex_averaged_start_map_position,
-                                  pos=chr_map$Build37_start_physical_position,
-                                  rsid=chr_map$Marker_name,
-                                  chr=chr)
-  }
-
-  return(gen_map)
 }

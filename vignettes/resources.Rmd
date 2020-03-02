@@ -24,11 +24,6 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 
 # TO DO
 
-* Différence au niveau des maps rutgers sur le site et celle sur /neurospin/brainomics/bio_resources
-  * La version téléchargé via ce <a href="http://compgen.rutgers.edu/downloads/rutgers_map_v3.zip">lien</a> est de 1.7 Go.
-  * La version sur /neurospin/brainomics/bio_resources/rutgers_map_v3 est de 5.7 Go.
-  * ===> Pas la bonne map à télécharger ?
-  
 * Phased data section
   * En quoi consiste les phased data
   * Comment phaser les datas
