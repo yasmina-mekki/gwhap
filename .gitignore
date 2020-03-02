@@ -2,4 +2,5 @@
 inst/doc
 .Rhistory
 man/
-vignettes/*.R
+vignettes/test.R
+vignettes/main.R
