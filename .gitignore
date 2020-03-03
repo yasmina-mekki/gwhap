@@ -2,7 +2,4 @@
 inst/doc
 .Rhistory
 man/*
-vignettes/augmented_map_blocs_test.R
-vignettes/main.R
-vignettes/haplotype_test.R
-vignettes/test_test_h.R
+test_modules/*
