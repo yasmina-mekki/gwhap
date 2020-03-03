@@ -1,16 +1,14 @@
-#' haplotypes block matrix for bgen file
-#' Assuming ukb_hap standard :
-#' one .bgen file / chromosome
-#' .bgen.bgi variant index file
-#' index 1 of .sample file starts at line 3
+#' haplotypes bloc matrix for bgen file
+#' This function is designed for UKB haplotypes standard :
+#' one .bgen file, .bgen.bgi variant index file and .sample file containing the participant's ID per chromosome.
 #' @param chr string, chromosome code of the desired bloc.
 #' @param start An integer specifying the starting position (bp) of the bloc.
 #' @param end An integer specifying the ending position (bp) of the bloc.
-#' @param bgnfile A path to a .bgen file for the desired chromosome
+#' @param bgnfile A path to a .bgen file for the desired chromosome.
 #' @param max_entries_per_sample An integer specifying the maximum number of probabilities expected per variant per sample.
 #' This is used to set the third dimension of the data matrix returned.
 #'
-#' @return haplotype count matrix for all haplotypes oserved in the block
+#' @return haplotype count matrix for all haplotypes oserved in the bloc.
 #' @import rbgen
 #' @import DBI
 #' @import dummies
