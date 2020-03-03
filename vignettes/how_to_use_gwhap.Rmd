@@ -31,21 +31,57 @@ if (!require(devtools)){install.packages("devtools")}
 devtools::install_github("yasmina-mekki/gwhap")
 ```
 
-# Download the Rutgers genetic map
+
+# Create the augmented genetic map
+
+
+### Using SNP list and genetic map on the same chromosome
+
+```{r}
+snp_list=c(100,150,200)
+genetic_map=data.frame(bp=c(100,200),
+                        cM=c(0.0,0.01))
+new_map=genetic_map_interp_chr(genetic_map = genetic_map,
+                              snp_list = snp_list)
+head(new_map)
+
+```
+### Using SNP list and genetic map on several chromosome
+We have 2 regions of 3 SNPs in 2 chromosomes chr1  and chr2 : 
+```{r}
+snp_list=data.frame(chr=c(rep("chr1",3),rep("chr2",3)),
+                    bp=c(100,150,200,100,150,200))
+head(snp_list)
+```
+We create a reference genetic map :
+```{r}
+
+genetic_map=data.frame(chr=c(rep("chr1",2),rep("chr2",2)),
+                       bp=c(100,200,100,200),
+                        cM=c(0.0,0.01,0.0,0.1))
+head(genetic_map)
+```
+Now we can interpolate the missing posistion in cM for all the chromosomes : 
+```{r}
+new_map=genetic_map_interp(genetic_map_all  = genetic_map,
+                                snp_list  = snp_list)
+head(new_map)
+
+```
+###Using snp file and Rutgers Map
+
 
 Download the Rutgers genetic map v3 (Kosambi)
 ```R
 download_rutgers_map(RESOURCE_ROOT)
 ```
 
-
-# Create the augmented genetic map
-
-Update the genetic map
+interpolate a new map for SNPs in snp_file.txt
 ```R
 to_be_updated_genetic_map_path = "path_to_your_snps_file/snp_file.txt"
 rutgers_map = "path_to_your_rutgers_map"
-gen_map_updated = genetic_map_update(genetic_map_path=rutgers_map, to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
+gen_map_updated = read.augmented_genetic_map(genetic_map_path=rutgers_map,
+                                            to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
 ```
 
 # Blocs creation
@@ -108,6 +144,3 @@ phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotype
 print(phenotype_distribution_plot)
 save_plot(phenotype_distribution_plot, paste0(output, 'phenotype_distribution_plot.pdf'))
 ```
-
-
-
