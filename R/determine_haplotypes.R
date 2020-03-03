@@ -16,10 +16,13 @@
 #'
 determine_haplotypes=function(chr, start, end, bgnfile, samples_index, max_entries_per_sample=4)
 {
+  # we should use the ID not their index ...
+  # for the returned object, we should keep the ID as well
 
   # get the IDs of the partcipants indexes
   # this part should be done outside of the function
   # use get_bgi_file and get_bgen_file functions
+  # use the .sample to get both index and ID ?
 
   bgifile = sprintf("%s.bgi", bgnfile)
   con = (dbConnect(RSQLite::SQLite(), bgifile))
