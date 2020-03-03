@@ -1,7 +1,8 @@
 .Rproj.user
 inst/doc
 .Rhistory
-man/
-vignettes/test.R
+man/*
+vignettes/augmented_map_blocs_test.R
 vignettes/main.R
 vignettes/haplotype_test.R
+vignettes/test_test_h.R
