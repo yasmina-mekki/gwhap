@@ -90,10 +90,10 @@ get_bgi_file <- function(file_path){
 #' @export
 #'
 get_bgen_file <- function(file_path, start, end, samples=samples, chromosome='', max_entries_per_sample=4){
-  return(bgen.load(filename=bgnfile,
+  return(bgen.load(filename = bgnfile,
                    data.frame(chromosome=chromosome, start=start, end=end),
                    samples = samples,
-                   max_entries_per_sample=max_entries_per_sample))
+                   max_entries_per_sample = max_entries_per_sample))
 }
 
 
