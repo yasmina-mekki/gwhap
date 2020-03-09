@@ -84,7 +84,9 @@ sample_semi_path = '/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/v2/ukb25
 # output
 output = '/neurospin/tmp/ymekki/new_repo/gwhap/haplotypes'
 ```
-The function handle one blocs at a time. In order to determine the haplotypes for the blocs created using the whole genome, we need to loop over them as follow :
+The function handle one blocs at a time. In order to determine the haplotypes for the blocs created using the whole genome, we need to loop over them.
+The determination of the haplotypes for 119.000 blocs is estimated to 1.5 days. In order to reduce the run time, we use the mcmapply function. Basically, this function will paralelize the process.
+Please refer to the code below to implement the determination of haplotypes using all the blocs determined in the above step.
 
 ```R
 for(chr in unique(df_blocs$chr)){
@@ -100,17 +102,33 @@ for(chr in unique(df_blocs$chr)){
   setDT(sample_index_file, keep.rownames = TRUE)[]
   # filtre on the phenotype IID and get the index
   samples_index = as.numeric(sample_index_file[sample_index_file$ID_2 %in% phenotype$IID, ]$rn)
+  
+  # get the ID that corresspond to the indexes
+  bgifile = sprintf("%s.bgi", bgnfile)
+  allVar = get_bgi_file(file_path = bgifile)
+  dummybg = bgen.load(
+    filename = bgnfile,
+    data.frame(
+      chromosome = '',
+      start = allVar$position[1],
+      end = allVar$position[1]
+    ),
+    max_entries_per_sample = 4
+  )
 
-  # determine the haplotypes
-  list_haplotypes = mapply(FUN     = determine_haplotypes,
-                           chr     = chr,
-                           start   = start,
-                           end     = end,
-                           bgnfile = bgnfile,
-                           samples_index = list(samples_index))
-
-  # binds all list elements by column
-  haplotype_combined = list.cbind(list_haplotypes)
+  # filter the partcipant ID using their index
+  mysamples = dummybg$samples[samples_index]
+  
+  # determine the haplotypes and binds all list elements by column
+  haplotype_combined <- do.call(cbind, mcmapply(FUN     = determine_haplotypes_per_bloc,
+                                               chr     = chr,
+                                               start   = start,
+                                               end     = end,
+                                               bgnfile = bgnfile,
+                                               samples_index = list(samples_index),
+                                               mysamples = list(mysamples),
+                                               mc.cores = 32) # number of core desired
+                                               )
 
   # save the haplotypes
   haplotype_combined_path = sprintf('%s/haplotypes_%s.RData', output, chr)
@@ -119,6 +137,11 @@ for(chr in unique(df_blocs$chr)){
 }
 ```
 At then end, the haplotypes concerning one chromosome are binded by column and then saved.
+Since, the test step implies that the haplotypes are tested per blocs, you need to reverse the binding process. This is done as follow :
+
+```R
+khra
+```
 
 # Test the haplotypes
 
