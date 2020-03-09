@@ -46,7 +46,7 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
       chr_map$Build37_start_physical_position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
     # perform the linear interpolation
-    gen_map_approx.fun <- approxfun(chr_map$Build37_start_physical_position[interp_in],
+    gen_map_approx.fun <- stats::approxfun(chr_map$Build37_start_physical_position[interp_in],
                                            chr_map$Sex_averaged_start_map_position[interp_in],
                                            ties="ordered")
 
