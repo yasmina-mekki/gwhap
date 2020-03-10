@@ -3,7 +3,7 @@
 #' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
 #' @param genetic_map_dir i.e. rutgers map
 #' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved. FALSE by default.
-#' @param map_name the genetic map name. Two maps name are available : rutgers and 1000_genome_interpolated. rutgers by default.
+#' @param map_name the genetic map name. Two maps name are available : rutgers, 1000_genome and 1000_genome_interpolated. rutgers by default.
 #' @param output A path to a file where the augmented genetic map will be saved.
 #'
 #' @return if save_genetic_map == TRUE, then the augmented genetic map is saved. Otherwise, it will return a list of dataframe.
