@@ -3,6 +3,7 @@
 #' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
 #' @param genetic_map_dir i.e. rutgers map
 #' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved. FALSE by default.
+#' @param map_name the genetic map name. Two maps name are available : rutgers and 1000_genome_interpolated. rutgers by default.
 #' @param output A path to a file where the augmented genetic map will be saved.
 #'
 #' @return if save_genetic_map == TRUE, then the augmented genetic map is saved. Otherwise, it will return a list of dataframe.
@@ -10,7 +11,7 @@
 #' @import readr
 #' @import tools
 #' @export
-create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, save_genetic_map=FALSE, output=''){
+create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE, output=''){
 
   # read the snp physical positions
 
@@ -39,15 +40,18 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
   # create the augmented genetic map
   gen_map_updated = list()
   for (chr in unique(snp_list$chromosome)){
-
-    # read the rutgers map
-    chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr)) #use Sys.glob instead of specifying the path
-    interp_in = chr_map$Build37_start_physical_position > (min(snp_list$bp[snp_list$chromosome == chr])-1) &
-      chr_map$Build37_start_physical_position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
+    
+    # read the genetic map. # use Sys.glob instead of specifying the path
+    if(map_name = 'rutgers'){chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))}
+    if(map_name = '1000_genome_interpolated'){chr_map = get_1000_genome_interpolated_map(sprintf('%s/chr%s.interpolated_genetic_map.gz', genetic_map_dir, chr))}
+    if(map_name = '1000_genome'){chr_map = get_1000_genome_map(sprintf('%s/genetic_map_chr%s_combined_b37.txt', genetic_map_dir, chr))} 
+    
+    # get interval of position defined by min-1 and max+1 neighbour variant in the genetic map
+    interp_in = chr_map$position > (min(snp_list$bp[snp_list$chromosome == chr])-1) & chr_map$position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
     # perform the linear interpolation
-    gen_map_approx.fun <- stats::approxfun(chr_map$Build37_start_physical_position[interp_in],
-                                           chr_map$Sex_averaged_start_map_position[interp_in],
+    gen_map_approx.fun <- stats::approxfun(chr_map$position[interp_in],
+                                           chr_map$cM[interp_in],
                                            ties="ordered")
 
     # filter on the position, rsid and snp interpolation for the current chromosome
