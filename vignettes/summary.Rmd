@@ -1,0 +1,51 @@
+---
+title: "Summary"
+output:
+  #rmarkdown::html_vignette:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gwhap)
+```
+
+
+# Create the augmented genetic map
+
+* rutgers map
+run time : > 4 min
+storage space : 26 Mo
+
+* 1000 genome interpolated map
+run time : > 4 min
+storage space : 24 Mo
+
+# Blocs creation
+
+number of blocs created : 119551
+run time : >10 sec
+storage space : 9.7 Mo
+
+# Determine the haplotypes
+
+Resting state subjects : 16627
+run time : approx. 4 hours
+storage space : 1.3 Go
+
+T1 subjects : 15612
+run time : approx. 3 hours
+storage space : 1.4 Go
+
+# Test the haplotypes
