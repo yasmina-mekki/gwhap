@@ -171,7 +171,8 @@ get_augmented_genetic_map <- function(augmented_genetic_map_dir, chromosomes=1:2
 #'
 #' @param blocs_dir A path to the blocs dir
 #' @param chromosomes  A list of chromosomes that one want to read
-#'
+#' @import readr
+#' 
 #' @return Data.table with all the blocs concatenated
 #' @export
 #'
