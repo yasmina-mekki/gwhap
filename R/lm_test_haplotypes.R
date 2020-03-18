@@ -74,8 +74,8 @@ bloc_test <- function(sum_Lm){
 #' @export
 #'
 complete_test <- function(sum_Lm){
-  return(lapply(sum_Lm, function(y,varL) {x = coefficients(y)
-                                          x[2:nrow(x), ncol(x)]}, varL))
+  return(lapply(sum_Lm, function(y, varL) {x = coefficients(y)
+                                           x[2:nrow(x), ncol(x)]}, varL))
 }
 
 #' variant (single) haplotype model test
@@ -83,7 +83,7 @@ complete_test <- function(sum_Lm){
 #' @param X haplotype counts matrix
 #' @param Y phenotype or residues matrix
 #'
-#' @return Significance of the each association. A two-side p-value of the t-statitic is estimated
+#' @return Significance of the each association. A two-side p-value of the t-statistic is estimated
 #' @export
 #'
 single_test <- function(X, Y){
