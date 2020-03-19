@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```R
 library(gwhap)
 
 RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"

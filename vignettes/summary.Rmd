@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```R
 library(gwhap)
 ```
 
@@ -29,8 +29,8 @@ library(gwhap)
   * storage space : 26 Mo
 
 * 1000 genome interpolated map
-  *run time : > 4 min
-  *storage space : 24 Mo
+  * run time : > 4 min
+  * storage space : 24 Mo
 
 # Blocs creation
 
