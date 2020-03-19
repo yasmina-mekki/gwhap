@@ -147,10 +147,26 @@ nrow(same)
 
 ```R
 diff <- df_merged_by_rsid[df_merged_by_rsid$cM.x != df_merged_by_rsid$cM.y, ]
-nrows(diff)
+nrow(diff)
 ```
 ==> 4798
-A revoir !!!!!
+
+```R
+diff_values = diff$cM.x - diff$cM.y
+mean(diff_values, na.rm=TRUE)
+```
+==> -1.844319e-16
+```R
+max(diff_values, na.rm=TRUE)
+```
+
+==> 5.115908e-13
+
+```R
+min(diff_values, na.rm=TRUE)
+```
+==> -5.115908e-13
+
 
 
 ```R
