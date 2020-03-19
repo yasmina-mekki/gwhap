@@ -84,7 +84,37 @@ The following table illutrate an example of a .bim file. The headers were added 
 	
 
 
-## Necessary fields when a bgne file is used
+## Necessary fields when a bgen file is used
+As described by <a href='https://bitbucket.org/gavinband/bgen/wiki/rbgen'>gavinband</a>, a bgen file contains a list of 5 structures:
+* A list of variants with the chromosome, the position, the rsid, the number of alleles, the allele 0 code and the allele 1 code
+* A list of sample IDs
+* The ploidy for each sample at each variant
+* An indicator of whether data is phased or unphased at each variants
+* The genotype probabilities. A 3d array with the first dimension being the variants, the second the samples, and the third the genotype
+
+Here is an example of a bgen file
+
+```R
+List of 5
+ $ variants:'data.frame':   2 obs. of  6 variables:
+  ..$ chromosome       : Factor w/ 1 level "01": 1 1
+  ..$ position         : int [1:2] 1001 2000
+  ..$ rsid             : Factor w/ 2 levels "RSID_101","RSID_2": 1 2
+  ..$ number_of_alleles: int [1:2] 2 2
+  ..$ allele0          : Factor w/ 1 level "A": 1 1
+  ..$ allele1          : Factor w/ 1 level "G": 1 1
+ $ samples : chr [1:500] "sample_001" "sample_002" "sample_003" "sample_004" ...
+ $ ploidy  : int [1:2, 1:500] 2 2 2 2 2 2 2 2 2 2 ...
+  ..- attr(*, "dimnames")=List of 2
+  .. ..$ : chr [1:2] "RSID_101" "RSID_2"
+  .. ..$ : chr [1:500] "sample_001" "sample_002" "sample_003" "sample_004" ...
+ $ phased  : logi [1:2] FALSE FALSE
+ $ data    : num [1:2, 1:500, 1:3] 0 NA 0.00784 0.02745 0.99608 ...
+  ..- attr(*, "dimnames")=List of 3
+  .. ..$ : chr [1:2] "RSID_101" "RSID_2"
+  .. ..$ : chr [1:500] "sample_001" "sample_002" "sample_003" "sample_004" ...
+  .. ..$ : chr [1:3] "g=0" "g=1" "g=2"
+```
 
 # Remarks about the phased data
 
@@ -95,9 +125,9 @@ The phased haplotypes in BGEN format.
 For the UKB cohorts, the phased haplotypes are available for each chromosome separatly.
 Three files are needed :
 
-* .bgen :
-* .bgi :
-* .sample : The sample file lists the order of the samples in the .bgen files
+* .bgen : Native binary file format for Oxford statistical genetics tools. For more detail, refer to the section above.
+* .bgi : bgen corresponding index files
+* .sample : The <a href='https://www.cog-genomics.org/plink/2.0/formats#sample'>sample file</a> lists the order of the samples in the .bgen files
 
 Please refer to this <a href="https://bitbucket.org/gavinband/bgen/wiki/BGEN_in_the_UK_Biobank">wiki</a> for more details.
 
