@@ -5,6 +5,8 @@
 #' @param start An integer specifying the starting position (bp) of the bloc.
 #' @param end An integer specifying the ending position (bp) of the bloc.
 #' @param bgnfile A path to a .bgen file for the desired chromosome.
+#' @param samples_index index list corresponding to the participant ID. You can found it in the .sample file
+#' @param mysamples correspondance of the partcipant index and ID using .bgi/.bgen file
 #' @param max_entries_per_sample An integer specifying the maximum number of probabilities expected per variant per sample.
 #' This is used to set the third dimension of the data matrix returned.
 #'
@@ -13,7 +15,7 @@
 #' @import DBI
 #' @import dummies
 #' @export
-#' 
+#'
 determine_haplotypes_per_bloc = function(chr, start, end, bgnfile, samples_index, mysamples, max_entries_per_sample=4)
 {
   # read the bgen file
@@ -45,10 +47,10 @@ determine_haplotypes_per_bloc = function(chr, start, end, bgnfile, samples_index
   my.effect.diplo = df[1:length(mysamples), ] + df[(length(mysamples) +1):(2 * length(mysamples)), ]
   colNames = colnames(my.effect.diplo)
   haps = unlist(lapply(strsplit(colNames,'_'), function(x) x[length(x)]))
-  
+
   # changing haps name format into chr_start_end_haps-code
   haps = vapply(strsplit(haps,"hapfact.."), `[`, 2, FUN.VALUE=character(1))
-  
+
   colnames(my.effect.diplo) = apply(data.frame(chr, start, end, haps), 1, paste, collapse='_')
   row.names(my.effect.diplo) = samples_index
   return(my.effect.diplo)

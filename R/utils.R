@@ -12,7 +12,7 @@
 #' @return the rutgers map in a data.table structure
 #' @import data.table
 #' @export
-#' 
+#'
 get_rutgers_map <- function(file_path){
   chr_rutgers_map = suppressMessages(fread(file_path))
   return(data.frame(rsid = chr_rutgers_map$Marker_name,
@@ -22,13 +22,12 @@ get_rutgers_map <- function(file_path){
 
 #' get 1000 genome interpolated map
 #'
-#' @param filepath the location of the 1000 genome interpolated map
+#' @param file_path the location of the 1000 genome interpolated map
 #'
 #' @return the 1000 genome interpolated map in a data.table structure
 #' @import data.table
-#' @import R.utils
 #' @export
-#' 
+#'
 get_1000_genome_interpolated_map <- function(file_path){
   chr_1000_genome_interpolated_map = suppressMessages(fread(file_path))
   chr_1000_genome_interpolated_map_filtred = data.frame(rsid = chr_1000_genome_interpolated_map[, 1],
@@ -47,9 +46,9 @@ get_1000_genome_interpolated_map <- function(file_path){
 #' @import data.table
 #' @export
 #'
-#' @examples
 get_1000_genome_map <- function(file_path){
   chr_1000_genome_map = suppressMessages(fread(file_path))
+  # the actual name of the column is Genetic_Map(cM). You need to rename chr_1000_genome_map before contrucing the dataframe
   return(data.frame(position = chr_1000_genome_map$position,
                     cM = chr_1000_genome_map$Genetic_Map(cM)))
 }
@@ -129,7 +128,7 @@ get_bgi_file <- function(file_path){
 #' @export
 #'
 get_bgen_file <- function(file_path, start, end, samples=samples, chromosome='', max_entries_per_sample=4){
-  return(bgen.load(filename = bgnfile,
+  return(bgen.load(filename = file_path,
                    data.frame(chromosome=chromosome, start=start, end=end),
                    samples = samples,
                    max_entries_per_sample = max_entries_per_sample))
@@ -172,7 +171,7 @@ get_augmented_genetic_map <- function(augmented_genetic_map_dir, chromosomes=1:2
 #' @param blocs_dir A path to the blocs dir
 #' @param chromosomes  A list of chromosomes that one want to read
 #' @import readr
-#' 
+#'
 #' @return Data.table with all the blocs concatenated
 #' @export
 #'
@@ -221,8 +220,8 @@ download_rutgers_map <- function(){
 
 #' get rutgers map in genMap format [bp,cM]
 #'
-#' @param file_path the location of the rutgers map
-#'
+#' @param genetic_map_path the location of the rutgers map
+#' @param chr chromosome code
 #' @return genetic_map : the genetetic mapin genMap format
 #'
 #' @import data.table
