@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```R
 library(gwhap)
 
 RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
@@ -30,67 +30,65 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 if (!require(devtools)){install.packages("devtools")}
 devtools::install_github("yasmina-mekki/gwhap")
 ```
+The gwhap package implies the use of a version of R; 3.6 and higher as well as a certain number of installed libraries.
+
+In order to facilitate the use of it, here is a recipe of a singularity image containing all the necessary.
+Please refer to the github repo, for more explanation to how to generate it.
+
+```R
+devtools::install_github("yasmina-mekki/gwhap_singularity_image")
+```
 
 
 # Create the augmented genetic map
 
+Currently, only threee kind of map are took into accounting : 
+* Rutgers genetic map v3 (Kosambi)
+* 1000_genome
+* 1000_genome_interpolated
 
-### Using SNP list and genetic map on the same chromosome
-
-```{r}
-snp_list=c(100,150,200)
-genetic_map=data.frame(bp=c(100,200),
-                        cM=c(0.0,0.01))
-new_map=genetic_map_interp_chr(genetic_map = genetic_map,
-                              snp_list = snp_list)
-head(new_map)
-
-```
-### Using SNP list and genetic map on several chromosome
-We have 2 regions of 3 SNPs in 2 chromosomes chr1  and chr2 : 
-```{r}
-snp_list=data.frame(chr=c(rep("chr1",3),rep("chr2",3)),
-                    bp=c(100,150,200,100,150,200))
-head(snp_list)
-```
-We create a reference genetic map :
-```{r}
-
-genetic_map=data.frame(chr=c(rep("chr1",2),rep("chr2",2)),
-                       bp=c(100,200,100,200),
-                        cM=c(0.0,0.01,0.0,0.1))
-head(genetic_map)
-```
-Now we can interpolate the missing posistion in cM for all the chromosomes : 
-```{r}
-new_map=genetic_map_interp(genetic_map_all  = genetic_map,
-                                snp_list  = snp_list)
-head(new_map)
-
-```
-###Using snp file and Rutgers Map
-
+Here is an example using the Rutgers genetic map.
 
 Download the Rutgers genetic map v3 (Kosambi)
 ```R
 download_rutgers_map(RESOURCE_ROOT)
 ```
 
-interpolate a new map for SNPs in snp_file.txt
+interpolate a new map for SNPs using either:
+
+* bim file
 ```R
-to_be_updated_genetic_map_path = "path_to_your_snps_file/snp_file.txt"
-rutgers_map = "path_to_your_rutgers_map"
-gen_map_updated = read.augmented_genetic_map(genetic_map_path=rutgers_map,
-                                            to_be_updated_genetic_map_path=to_be_updated_genetic_map_path)
+snp_physical_positions = "path_to_your_snps_file/snp_file.bim"
 ```
+
+* bgen file
+```R
+snp_physical_positions = "path_to_your_bgen_file/ukb_hap_"
+```
+Create the augmented genetic map as follow:
+
+```R
+rutgers_map_dir = "path_to_your_rutgers_map_dir"
+output_dir = 'path_to_your_output_dir'
+create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=rutgers_map_dir, map_name='rutgers', save_genetic_map=TRUE, output=output_dir)
+```
+
 
 # Blocs creation
 
 ## Create the blocs
 
+Before creating the clocs, you need to load the map created above
+
+```R
+augmented_genetic_map_dir = 'path_to_your_output_dir'
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir, chromosomes=1:23)
+```
+
 Create blocs with a single delta
 ```R
-df_blocks = create_blocks(gen_map_updated, delta=1e-3)
+output_dir = 'path_to_your_output_dir'
+create_blocks(augmented_map_df, delta=1e-3, save_blocs=TRUE, output=output_dir)
 ```
 
 Create blocs with multiple values of delta
@@ -98,7 +96,7 @@ Create blocs with multiple values of delta
 deltas = c(1e-3, 2.5e-3, 5e-3, 7.5e-3)
 dfs_blocks = data.frame()
 for(delta in deltas){
-  df_blocks_tmp = create_blocks(genetics_map=gen_map_updated, delta=delta)
+  df_blocks_tmp = create_blocks(augmented_map_df, delta=delta, save_blocs=FALSE)
   dfs_blocks <- rbind(dfs_blocks, df_blocks_tmp)
 }
 ```
@@ -110,14 +108,12 @@ Blocs distribution plot
 * All chromosomes
 ```
 haplotype_block_distribution_per_delta = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5))
-print(haplotype_block_distribution_per_delta)
 save_plot(haplotype_block_distribution_per_delta, paste0(output, 'haplotype_block_distribution_per_delta.pdf'))
 ```
 
 * Per chromosome
 ```R
 haplotype_block_distribution_per_chr = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5), per_chromosome=TRUE)
-print(haplotype_block_distribution_per_chr)
 save_plot(haplotype_block_distribution_per_chr, paste0(output, 'haplotype_block_distribution_per_chr.pdf'))
 ```
 
@@ -131,7 +127,49 @@ save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
 
 # Determine the haplotypes
 
+Before determining the haplotypes, you need to load the blocs created above
 
+```R
+augmented_genetic_map_dir = 'path_to_your_output_dir'
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir, chromosomes=1:23)
+```
+
+Here is an example for one bloc
+
+* Set the parameters
+```R
+chr = 'chr1'
+start = 1000
+end = 1200
+bgnfile = sprintf('bgen_file_path_%s.bgen', chr)
+samples_index = c('index_1', 'index_2', 'index_3', 'index_4', 'index_5')
+mysamples = c('IID_1', 'IID_2', 'IID_3', 'IID_4', 'IID_5')
+```
+
+* Run the determine haplotype function
+```R
+haplotypes = determine_haplotypes_per_bloc(chr, start, end, bgnfile, samples_index, mysamples)
+```
+
+Please refer to the genome wide example vignette for more code about how to determine the haplotypes using all the blocs.
+
+
+# Test the haplotypes
+
+* Set the parameters
+```R
+X = load('haplotypes_path_chr1.RData')
+Y = read_delim(file_path_phenotype.tsv, delim='\t')
+```
+
+* Run the test haplotypes function
+```R
+test_results = lm_test_haplotypes(X, Y, kind='all')
+```
+
+***Warning:***
+
+One should know that the test haplotype function assume that the Y are residualized. Indeed, it does not take into account the covariates
 
 
 # Phenotypes distribution plots
@@ -141,6 +179,5 @@ Phenotypes distribution plots
 ```R
 phenotypes_path = Sys.glob(file.path("path_to_your_phenotypes/" , '*'))
 phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotypes_path)
-print(phenotype_distribution_plot)
 save_plot(phenotype_distribution_plot, paste0(output, 'phenotype_distribution_plot.pdf'))
 ```
