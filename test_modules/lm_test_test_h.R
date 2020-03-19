@@ -13,7 +13,11 @@ library(parallel)
 
 
 #_________________________________________________________________________________________________________
-load('/neurospin/tmp/ymekki/new_repo/gwhap/haplotypes/haplotypes_chr10.RData')
+#???
+#
+
+
+load('/neurospin/tmp/ymekki/new_repo/gwhap/RS_subjects/haplotypes/haplotypes_chr10.RData')
 #haplotype_combined
 chr = "chr10"
 
@@ -30,8 +34,9 @@ columns_blocs = str_subset(colnames(haplotype_combined), blocs[1])
 haplotype_one_bloc = haplotype_combined[, columns_blocs]
 
 #_________________________________________________________________________________________________________
-
-chr = "chr10"
+# get the IID
+#_________________________________________________________________________________________________________
+chr = "chr5"
 
 # phenotypes
 phenotype_path = '/neurospin/brainomics/2019_ln_YME/GWAS/UKB_v2/imputed_data/non_filtred/D/Putamen_d_IFGorb_d/Putamen_d_IFGorb_d.txt'
@@ -50,6 +55,7 @@ phenotype_filtred = phenotype[phenotype$IID %in% sample_index_file$ID_2, ]
 
 #___________________________________________________________________________________________________
 # résidualisation
+#___________________________________________________________________________________________________
 covars_path = '/neurospin/brainomics/2019_ln_YME/covars/UKB/genetics/covar_GCTA/covar_sex_modified_GCTA_SexArray.cov'
 qcovar_path = '/neurospin/brainomics/2019_ln_YME/covars/UKB/genetics/covar_GCTA/qcovar_GCTA_Age_10PCS.cov'
 covars  = read_delim(covars_path, delim='\t')
@@ -75,12 +81,24 @@ Y_cov_residualisee = cbind(Y_residualisee, cov_pheno_UKB)
 Y_filtred_residualisee = Y_cov_residualisee[, c('IID', 'connectivity_residualisee')]
 
 #___________________________________________________________________________________________________
+# run the test part
+#___________________________________________________________________________________________________
 
+
+
+# format Y : IID, phenotype value
+
+phenotypes_sulci = fread("/neurospin/ukb/workspace/pheno_boxcox/all_sulci_boxcox.tsv")
+Y_filtred = phenotypes_sulci[, c('IID', 'FCMpost_left')]
 
 sprintf('Start time : %s', Sys.time())
-output = '/neurospin/tmp/ymekki/new_repo/gwhap/RS_subjects/lm_test'
+#output = '/neurospin/tmp/ymekki/new_repo/gwhap/RS_subjects/lm_test'
+output = '/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/lm_test'
+
 for (i in 1:22){
-  haplotypes_path = '/neurospin/tmp/ymekki/new_repo/gwhap/RS_subjects/haplotypes/haplotypes_'
+  #haplotypes_path = '/neurospin/tmp/ymekki/new_repo/gwhap/RS_subjects/haplotypes/haplotypes_'
+  haplotypes_path = '/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/haplotypes/haplotypes_'
+  
   load(sprintf('%schr%s.RData', haplotypes_path, i))
   #haplotype_combined
   chr = sprintf('chr%s', i)
@@ -93,36 +111,55 @@ for (i in 1:22){
   end = unique(vapply(strsplit(colnames(haplotype_combined),"_"), `[`, 3, FUN.VALUE=character(1)))
   # concatenate the start and end bloc position
   blocs = sprintf('%s_%s', start, end)
-
+  
   results_chr = mcmapply(FUN = lm_test_haplotypes_per_bloc,
                          blocs = blocs,
                          haplotype_combined = list(haplotype_combined),
                          sample_index_file = list(sample_index_file),
-                         Y_filtred_residualisee = list(Y_filtred_residualisee),
+                         Y_filtred = list(Y_filtred),
                          mc.cores = 32)
   
-  lm_test_path = sprintf('%s/lm_test_%s.RData', output, chr)
-  save(results_chr, file=lm_test_path, compress=T)
+  # results_chr is represented by matrix : rows representing the different test and columns representing each blocs
+  # row bind the results test separetely
+  bloc_test_results     = data.frame()
+  complete_test_results = data.frame()
+  single_test_results   = data.frame()
+  for(col in colnames(results_chr)){
+    bloc_test_results     = rbind(bloc_test_results, results_chr[1, col][[1]])
+    complete_test_results = rbind(complete_test_results, results_chr[2, col][[1]])
+    single_test_results   = rbind(single_test_results, results_chr[3, col][[1]])
+  } 
+  
+  
+  # save the results
+  dir.create(sprintf('%s/chr_%s', output, i))
+  write.table(bloc_test_results, sprintf('%s/chr_%s/bloc_test_results.tsv', output, i), sep="\t", row.names=FALSE)
+  write.table(complete_test_results, sprintf('%s/chr_%s/complete_test_results.tsv', output, i), sep="\t", row.names=FALSE)
+  write.table(single_test_results, sprintf('%s/chr_%s/single_test_results.tsv', output, i), sep="\t", row.names=FALSE)
 }
 sprintf('End time : %s', Sys.time())
 
 
-lm_test_haplotypes_per_bloc = function(blocs, haplotype_combined, sample_index_file, Y_filtred_residualisee){
+lm_test_haplotypes_per_bloc = function(blocs, haplotype_combined, sample_index_file, Y_filtred){
   
-  # filtre sur le premier bloc ...
+  # change Y_filtred column name
+  colnames(Y_filtred) = c('IID', 'phenotype')
+  
+  # get only the haplotypes corresponding to bloc got as input
   columns_blocs = str_subset(colnames(haplotype_combined), blocs)
   haplotype_one_bloc = haplotype_combined[, columns_blocs]
-
+  
   # This is done in order to be sure that the subject are well alligned
   # get the index columns
   setDT(haplotype_one_bloc, keep.rownames = TRUE)[]
   # merge the index file and the haplotypes using the index
   df_tmp_merged = merge(sample_index_file, haplotype_one_bloc, by="rn")
   # merge the df obtained above with the phenotype using the ID
-  df_merged = merge(df_tmp_merged, Y_filtred_residualisee, by.x = 'ID_2', by.y = 'IID')
+  df_merged = merge(df_tmp_merged, Y_filtred, by.x = 'ID_2', by.y = 'IID')
   
+  # set X, Y and run the haplotypique test
   X = df_merged[, ..columns_blocs]
-  Y = df_merged[, 'connectivity_residualisee']
+  Y = df_merged[, 'phenotype']
   results = lm_test_haplotypes(X, Y, kind='all')
   
   return(results)
