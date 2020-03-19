@@ -12,12 +12,15 @@
 #' @param Y phenotype or residues matrix
 #' @param kind which test to perform. Four values are possible : single, complete, bloc or all
 #'
-#' @return The resulting test as summary.lm for all haplotypes for 3 test
+#' @return A list of the results of the three test as summary.lm for all haplotypes
 #' @export
 #'
 lm_test_haplotypes = function(X, Y, kind='all'){
   
   if(kind != 'single'){
+    
+    colnames(Y) = c('phenotype')
+    
     # get the columns name
     col_orgY = colnames(Y)
     col_orgX = colnames(X)
@@ -40,13 +43,44 @@ lm_test_haplotypes = function(X, Y, kind='all'){
     names(sum_Lm) = col_orgY
   }
   
-  if(kind == 'bloc'){return(bloc_test(sum_Lm))}
-  if(kind == 'complete'){return(complete_test(sum_Lm))}
-  if(kind == 'single'){return(single_test(X, Y))}
-  if(kind == 'all'){return(list(block = bloc_test(sum_Lm), complete = complete_test(sum_Lm), variant = single_test(X, Y)))}
+  final_results = list()
   
+  if(kind == 'bloc' | kind == 'all'){
+    
+    # perform the test
+    bloc_test_results = bloc_test(sum_Lm)
+    
+    # set the results into the right format
+    results  = data.frame(strsplit(varL[1], '_')[[1]][2], strsplit(varL[1], '_')[[1]][3], bloc_test_results[[1]], nrow(Y), length(varL))
+    names(results) <- c('start', 'end', 'p_value','nb_subjects', 'nb_haplotypes')
+    
+    final_results[['bloc']] = results
+  }
+  
+  if(kind == 'complete' | kind == 'all'){
+    
+    # perform the test
+    complete_test_results = complete_test(sum_Lm)
+    
+    # set the results into the right format
+    results  = data.frame()
+    for (i in 1:length(complete_test_results$phenotype)){
+      results = rbind(results, data.frame(strsplit(names(complete_test_results$phenotype[i]), '_')[[1]][2],
+                                          strsplit(names(complete_test_results$phenotype[i]), '_')[[1]][3],
+                                          names(complete_test_results$phenotype[i]),
+                                          complete_test_results$phenotype[[i]],
+                                          nrow(Y),
+                                          length(complete_test_results$phenotype)))
+    }
+    names(results) <- c('start', 'end', 'haplotype','p_value','nb_subjects', 'nb_haplotypes')
+    
+    final_results[['complete']] = results
+  }
+  
+  if(kind == 'single' | kind == 'all'){final_results[['single']] = single_test(X, Y)}
+  
+  return(final_results)
 }
-
 
 #' haplotype bloc model test
 #' association between a given bloc and a phenotype
@@ -89,18 +123,25 @@ complete_test <- function(sum_Lm){
 single_test <- function(X, Y){
   
   # get the columns name
+  colnames(Y) = c('phenotype')
   col_orgY = colnames(Y)
   col_orgX = colnames(X)
   
-  # linear regression
+  # linear regression for multiple phenotypes ...
   varLM = lapply(col_orgX,
                  function(x) lapply(col_orgY,
                                     function(y) lm(formula = sprintf("cbind( %s ) ~ %s ", y, x), data = data.frame(cbind(Y, X)))
                                     )
                  )
   
+  # linear regression for one phenotype
+  #varLM = lapply(col_orgX,
+  #               function(x) lm(formula = sprintf("cbind( %s ) ~ %s ", col_orgY, x), data = data.frame(cbind(Y, X)))
+  #              )
+  
   # get the summary of the model trained above
   sum_VLM = lapply(varLM, function(vlm_L) lapply(vlm_L, summary))
+  #sum_VLM = lapply(varLM, function(vlm_L) summary(vlm_L))
   
   # get the p values
   pv_Var = lapply(sum_VLM, function(z){names(z) = col_orgY[1:ncol(Y)]
@@ -109,12 +150,12 @@ single_test <- function(X, Y){
                                        }
                    )
   
-  # set the output names
-  single_test = setNames(object=(group_by(do.call(rbind,
-                                                  lapply(pv_Var, function(x) data.frame(pheno = names(x), pval = unlist(x[as.character(names(x))])))),
-                                          pheno) %>% summarise(pval = list(setNames(pval, col_orgX))))$pval,
-                         as.character(colnames(Y))
-                         )
+  # set the output into the right format
+  results  = data.frame()
+  for (i in 1:length(pv_Var)){
+    results = rbind(results, data.frame(strsplit(col_orgX[i], '_')[[1]][2], strsplit(col_orgX[i], '_')[[1]][3], col_orgX[i], pv_Var[[i]]$phenotype, nrow(Y), ncol(X)))
+  }
+  names(results) <- c('start', 'end', 'haplotype','p_value','nb_subjects', 'nb_haplotypes')
   
-  return(single_test)
+  return(results)
 }
