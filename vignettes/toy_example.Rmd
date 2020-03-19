@@ -1,0 +1,70 @@
+---
+title: "Toy example"
+output:
+  #rmarkdown::html_vignette:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{toy_example}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```R
+library(gwhap)
+
+RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
+```
+
+
+# Installation of `gwhap`
+
+```R
+if (!require(devtools)){install.packages("devtools")}
+devtools::install_github("yasmina-mekki/gwhap")
+```
+
+
+# Create the augmented genetic map
+
+
+### Using SNP list and genetic map on the same chromosome
+
+```R
+snp_list=c(100,150,200)
+genetic_map=data.frame(bp=c(100,200),
+                        cM=c(0.0,0.01))
+new_map=genetic_map_interp_chr(genetic_map = genetic_map,
+                              snp_list = snp_list)
+head(new_map)
+
+```
+### Using SNP list and genetic map on several chromosome
+We have 2 regions of 3 SNPs in 2 chromosomes chr1  and chr2 : 
+```R
+snp_list=data.frame(chr=c(rep("chr1",3),rep("chr2",3)),
+                    bp=c(100,150,200,100,150,200))
+head(snp_list)
+```
+We create a reference genetic map :
+```{r}
+
+genetic_map=data.frame(chr=c(rep("chr1",2),rep("chr2",2)),
+                       bp=c(100,200,100,200),
+                        cM=c(0.0,0.01,0.0,0.1))
+head(genetic_map)
+```
+Now we can interpolate the missing posistion in cM for all the chromosomes : 
+```R
+new_map=genetic_map_interp(genetic_map_all  = genetic_map,
+                                snp_list  = snp_list)
+head(new_map)
+
+```
