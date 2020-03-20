@@ -65,50 +65,6 @@ haplotype_bloc_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0.
 }
 
 
-#' Genome coverage of haplotype blocs
-#'
-#' @description Genome coverage of haplotype blocs
-#'
-#' @param df_blocs data frame structure containing all the blocs created
-#' @param colors the colors desired represented by an integer value
-#' @param verbose silent warning messages. FALSE by default.
-#'
-#' @return karyotype plot object
-#' @import karyoploteR
-#' @importFrom grDevices rainbow
-#' @importFrom dplyr group_by summarise
-#' @export
-karyotype_plot <- function(df_blocs, colors=200, verbose=FALSE){
-
-  # silent warning messages
-  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
-
-  # params blocs setting
-  df_blocs$lbp = df_blocs$to_bp - df_blocs$from_bp
-  df_blocs$mb  = round(df_blocs$from_bp/1e6)
-  #sum_l_bp_chr = df_blocs %>% group_by(chr=df_blocs$chr, mb=df_blocs$mb) %>% summarise(coverage=sum(df_blocs$lbp)/1e6)
-
-  sum_l_bp_chr = df_blocs %>% group_by(chr=chr, mb=mb) %>% summarise(coverage=sum(lbp)/1e6)
-
-  # params plot setting
-  pp <- getDefaultPlotParams(plot.type = 1)
-  pp$data1height = 200
-
-  # init karyotype object with params plot chosen above
-  karyotype_plot_obj <- plotKaryotype(chromosomes=c('autosomal'), plot.params = pp)
-  kpHeatmap(karyoplot = karyotype_plot_obj,
-            chr       = sum_l_bp_chr$chr,
-            x0        = sum_l_bp_chr$mb*1e6,
-            x1        = (sum_l_bp_chr$mb+1)*1e6,
-            y         = round(sum_l_bp_chr$coverage*100),
-            colors    = rainbow(colors)[round(sum_l_bp_chr$coverage*100)]) #rainbow(200, start=0.2, end=0.7)
-  # add base numbers
-  kpAddBaseNumbers(karyotype_plot_obj)
-
-  return(karyotype_plot_obj)
-}
-
-
 #_________________________
 # utils. Not in the right place
 #_________________________
