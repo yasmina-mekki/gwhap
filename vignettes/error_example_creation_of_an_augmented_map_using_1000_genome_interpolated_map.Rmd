@@ -183,6 +183,14 @@ summary(df_merged_by_rsid)
 |                   |   Max.   :286.28| Max.   :249222527|   Max.   :22.00| Max.   :286.28  |Max.   :249222527   |chr5   : 38734   |
 |                   |   NA's   :2     |                  |                |                 |                    |(Other):382733   |
 
+check the NA values :
+```R
+gen_map_updated[[10]][is.na(gen_map_updated[[10]]),]
+```
 
+| index     |cM       |pos|          rsid| chr|
+|   ---   |:-----------------:|:------------:   |:----------------:|
+1     |NA |    94513 |Affx-52349171  |10|
+32626 |NA| 135439049  | rs200347477  |10|
 
-
+===> premier et dernier snp du chromosome 10
