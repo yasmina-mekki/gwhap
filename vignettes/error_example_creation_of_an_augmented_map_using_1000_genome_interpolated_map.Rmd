@@ -188,9 +188,29 @@ check the NA values :
 gen_map_updated[[10]][is.na(gen_map_updated[[10]]),]
 ```
 
-| index     |cM       |pos|          rsid| chr|
-|   ---   |:-----------------:|:------------:   |:----------------:|
-1     |NA |    94513 |Affx-52349171  |10|
-32626 |NA| 135439049  | rs200347477  |10|
+| index     |cM |pos        |          rsid | chr|
+|:  ---     |:-:|:---------:|:-------------:|--: |
+|1          |NA |    94513  | Affx-52349171 |10  |
+|32626      |NA | 135439049 | rs200347477   |10  |
 
 ===> premier et dernier snp du chromosome 10
+
+
+```R
+genMap_all_chr10 = genMap_all[genMap_all$chr == 'chr10',]
+genMap_all_chr10[genMap_all_chr10$rsid == 'rs200347477', ]
+```
+
+|   index  |      cM|       pos|        rsid|   chr|
+|:  ---    |:------:|:--------:|:----------:| ---- |
+|135439049 |180.9305| 135439049| rs200347477| chr10|
+
+
+```R
+genMap_all_chr10[genMap_all_chr10$rsid == 'Affx-52349171', ]
+```
+|   index  |      cM    |       pos|        rsid |   chr|
+|:  ---    |:----------:|:--------:|:-----------:| ---- |
+|94513     | 0.002718824| 94513    |Affx-52349171| chr10|
+
+===> Les SNPs sont présent dans genMap_all
