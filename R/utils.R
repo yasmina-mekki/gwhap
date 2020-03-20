@@ -54,9 +54,12 @@ get_1000_genome_interpolated_map <- function(file_path){
 #'
 get_1000_genome_map <- function(file_path){
   chr_1000_genome_map = suppressMessages(fread(file_path))
-  # the actual name of the column is Genetic_Map(cM). You need to rename chr_1000_genome_map before construcing the dataframe
+
+  # replacing the () and / characters by _ in the columns name
+  colnames(get_1000_genome_map) = c('position', 'COMBINED_rate_cM_Mb', 'Genetic_Map_cM')
+
   return(data.frame(position = chr_1000_genome_map$position,
-                    cM = chr_1000_genome_map$Genetic_Map(cM)))
+                    cM = chr_1000_genome_map$Genetic_Map_cM))
 }
 
 

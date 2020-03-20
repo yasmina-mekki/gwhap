@@ -18,6 +18,7 @@
 #' @import data.table
 #' @import readr
 #' @import tools
+#' @importFrom stats na.omit
 #' @export
 create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE, output='', verbose=FALSE){
 
@@ -53,7 +54,7 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
   }
 
   # create the augmented genetic map
-  gen_map_updated = list()
+  gen_map_augmented = list()
   for (chr in unique(snp_list$chromosome)){
 
     # read the genetic map
@@ -74,20 +75,26 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
     position   = snp_list$bp[snp_list$chromosome == chr]
     rsid       = snp_list$snp[snp_list$chromosome == chr]
 
-    # store the augmented genetic map for each chromosome
-    gen_map_updated[[chr]]  = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
+    # check if NA values are present
+    gen_map_augmented_chr = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
+    if (nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ]) != 0){
+      warning(sprintf('Number of NA in chromosome %s : %s. Progress towards removing ...', chr, nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ])))
+    }
+
+    # remove the NAs if present and store the augmented genetic map for each chromosome
+    gen_map_augmented[[chr]]  = na.omit(gen_map_augmented_chr)
   }
 
   # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
   if (save_genetic_map) {
     for (chr in unique(snp_list$chromosome)){
       file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
-      write_genetic_map(gen_map_updated[[chr]], file_path)
+      write_genetic_map(gen_map_augmented[[chr]], file_path)
     }
     return(0)
   }
   # if save_genetic_map equal to FALSE, return the augmented genetic map as a list of dataframe
-  return(gen_map_updated)
+  return(gen_map_augmented)
 }
 
 
