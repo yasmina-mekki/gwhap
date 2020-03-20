@@ -86,6 +86,7 @@ The following table illutrate an example of a .bim file. The headers were added 
 
 ## Necessary fields when a bgen file is used
 As described by <a href='https://bitbucket.org/gavinband/bgen/wiki/rbgen'>gavinband</a>, a bgen file contains a list of 5 structures:
+
 * A list of variants with the chromosome, the position, the rsid, the number of alleles, the allele 0 code and the allele 1 code
 * A list of sample IDs
 * The ploidy for each sample at each variant

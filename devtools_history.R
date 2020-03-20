@@ -5,6 +5,7 @@ usethis::use_package("dplyr")
 usethis::use_package("magrittr")
 usethis::use_package("karyoploteR")
 usethis::use_package("grDevices")
+usethis::use_package("RSQLite")
 usethis::use_package("DBI")
 usethis::use_package("tools")
 usethis::use_package("utils")
@@ -13,7 +14,8 @@ usethis::use_package("dummies")
 usethis::use_package("stats")
 devtools::install(build_vignettes=TRUE)
 usethis::use_build_ignore("devtools_history.R")
-usethis::use_build_ignore("ressource/*")
+
+
 usethis::use_build_ignore("test_modules/*")
 usethis::use_build_ignore("vignettes/*.png")
 

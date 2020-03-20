@@ -1,13 +1,19 @@
-#' phenotype distribution
+#' Phenotype distribution
 #'
-#' @param phenotypes_path list of phenotypes path
-#' @param alpha alpha
+#' @description Phenotype distribution
 #'
-#' @return ggplot
+#' @param phenotypes_path list of phenotypes path. The phenotype file should have as column the participant IID and the phenotype values
+#' @param alpha transparency param for the entire plot
+#' @param verbose silent warning messages. FALSE by default.
+#'
+#' @return phenotype distribution
 #' @import ggplot2
 #' @import readr
 #' @export
-phenotype_distribution <- function(phenotypes_path, alpha=0.4){
+phenotype_distribution <- function(phenotypes_path, alpha=0.4, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   phenotypes_df =  data.frame()
   for(path in phenotypes_path){
@@ -15,63 +21,73 @@ phenotype_distribution <- function(phenotypes_path, alpha=0.4){
     phenotype_file$phenotype_name = strsplit(basename(path), "\\.")[[1]][1]
     phenotypes_df <- rbind(phenotypes_df, phenotype_file)
   }
-  return(ggplot(phenotypes_df, aes(x=phenotypes_df$connectivity, fill=phenotype_file$phenotype_name)) + geom_density(alpha = alpha))
+  return(ggplot(phenotypes_df, aes(x=phenotypes_df$connectivity, fill=factor(phenotypes_df$phenotype_name))) +
+         geom_density(alpha=alpha) +
+         xlab(colnames(phenotypes_df)[2]))
 }
 
 
 
 
-#' haplotype block distribution
+#' Haplotype bloc distribution
 #'
-#' @param df_blocs blocs
+#' @description Haplotype bloc distribution
+#'
+#' @param df_blocs data frame structure containing all the blocs created
 #' @param xlim range of the x axe
 #' @param ylim range of the y axe
-#' @param alpha alpha
+#' @param alpha transparency parameter for the entire plot
 #' @param per_chromosome if the distribution are grouped by chromosome or not. By default FALSE.
+#' @param verbose silent warning messages. FALSE by default.
 #'
-#' @return ggplot
+#' @return haplotype bloc distribution
 #' @importFrom magrittr %>%
 #' @importFrom dplyr mutate
 #' @export
-haplotype_block_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0.1, per_chromosome=FALSE){
-  # TO DO
-  # to_cm-from_cm same as win_size ?
+haplotype_bloc_distribution <- function(df_blocs, xlim=NULL, ylim=NULL, alpha=0.1, per_chromosome=FALSE, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   factor = df_blocs$delta
   if(per_chromosome){factor = df_blocs$chr}
 
-  haplotype_block_distribution_plot <- ggplot(df_blocs %>% mutate(lh=df_blocs$to_cm-df_blocs$from_cm), aes(x=lh, fill=factor(factor))) +
+  haplotype_bloc_distribution_plot <- ggplot(df_blocs, aes(x=df_blocs$to_cm-df_blocs$from_cm, fill=factor(factor))) +
                                        geom_density(alpha=alpha) +
-                                       labs(fill = "delta (cM)")
-  if(!is.null(xlim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + xlim(xlim[1], xlim[2])}
-  if(!is.null(ylim)){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + ylim(ylim[1], ylim[2])}
-  if(per_chromosome){haplotype_block_distribution_plot <- haplotype_block_distribution_plot + facet_grid(rows=vars(df_blocs$delta), scales="free")}
+                                       scale_x_continuous(trans = 'log10') +
+                                       labs(fill = "delta (cM)") +
+                                       xlab('lh(cM)')
+  if(!is.null(xlim)){haplotype_bloc_distribution_plot <- haplotype_bloc_distribution_plot + xlim(xlim[1], xlim[2])}
+  if(!is.null(ylim)){haplotype_bloc_distribution_plot <- haplotype_bloc_distribution_plot + ylim(ylim[1], ylim[2])}
+  if(per_chromosome){haplotype_bloc_distribution_plot <- haplotype_bloc_distribution_plot + facet_grid(rows=vars(df_blocs$delta))}
 
-  return(haplotype_block_distribution_plot)
+  return(haplotype_bloc_distribution_plot)
 }
 
 
 #' Genome coverage of haplotype blocs
 #'
-#' @param df_blocs data.frame
-#' @param colors colors (int)
+#' @description Genome coverage of haplotype blocs
+#'
+#' @param df_blocs data frame structure containing all the blocs created
+#' @param colors the colors desired represented by an integer value
+#' @param verbose silent warning messages. FALSE by default.
 #'
 #' @return karyotype plot object
 #' @import karyoploteR
 #' @importFrom grDevices rainbow
 #' @importFrom dplyr group_by summarise
 #' @export
-karyotype_plot <- function(df_blocs, colors=NULL){
-  # TO DO
-  # handle colors params
-  # add scale bar
-  # issues here ...
+karyotype_plot <- function(df_blocs, colors=200, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   # params blocs setting
   df_blocs$lbp = df_blocs$to_bp - df_blocs$from_bp
   df_blocs$mb  = round(df_blocs$from_bp/1e6)
   #sum_l_bp_chr = df_blocs %>% group_by(chr=df_blocs$chr, mb=df_blocs$mb) %>% summarise(coverage=sum(df_blocs$lbp)/1e6)
-  
+
   sum_l_bp_chr = df_blocs %>% group_by(chr=chr, mb=mb) %>% summarise(coverage=sum(lbp)/1e6)
 
   # params plot setting
@@ -85,7 +101,7 @@ karyotype_plot <- function(df_blocs, colors=NULL){
             x0        = sum_l_bp_chr$mb*1e6,
             x1        = (sum_l_bp_chr$mb+1)*1e6,
             y         = round(sum_l_bp_chr$coverage*100),
-            colors    = rainbow(200)[round(sum_l_bp_chr$coverage*100)]) #rainbow(200, start=0.2, end=0.7)
+            colors    = rainbow(colors)[round(sum_l_bp_chr$coverage*100)]) #rainbow(200, start=0.2, end=0.7)
   # add base numbers
   kpAddBaseNumbers(karyotype_plot_obj)
 
@@ -97,13 +113,20 @@ karyotype_plot <- function(df_blocs, colors=NULL){
 # utils. Not in the right place
 #_________________________
 
-#' Save plot
+#' Save ggplot object
+#'
+#' @description Save a ggplot object as a png/pdf file
 #'
 #' @param plot the ggplot object
 #' @param output the path indicating where to save the plot
+#' @param verbose silent warning messages. FALSE by default.
 #'
 #' @return None
 #' @export
-save_plot <- function(plot, output){
+save_plot <- function(plot, output, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
+  # save the plot
   ggsave(output)
 }

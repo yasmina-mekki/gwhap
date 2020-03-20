@@ -1,22 +1,32 @@
-#' lm test haplotypes
-#' Perform three tests using R-base lm:
+#' Test haplotypes
+#'
+#' @description Perform three tests using R-base lm:
 #' haplotype bloc model test
 #' complete model haplotype test
 #' variant (single) haplotype model test
-#' the common haplotype is removed for two first test
-#' Assuming no covariates or Y are residues over covariates for all model
+#' the common haplotype is removed for the two first test
+#' Assuming no covariates
 #' No missing values allowed in X
 #' Missing values allowed in Y
 #'
 #' @param X haplotype counts matrix
 #' @param Y phenotype or residues matrix
-#' @param kind which test to perform. Four values are possible : single, complete, bloc or all
+#' @param kind which test to perform. Four values are possible: single, complete, bloc or all
+#' @param verbose silent warning messages. FALSE by default.
 #'
-#' @return A list of the results of the three test as summary.lm for all haplotypes
+#' @return A list of the results of the three test. Each test results is represented by a data frame structure
+#' The data frame of the bloc test contains the following information:
+#' One bloc per line with the start and the end of the bloc position, p_value, number of subjects and the number of haplotypes of the bloc
+#' The data frame of the bloc complete and variant test contains the following information:
+#' One haplotype per line with start and the end of the bloc position,
+#' the haplotype code, p_value, number of subjects and the number of haplotypes of the bloc
 #' @importFrom stats lm
 #' @export
 #'
-lm_test_haplotypes = function(X, Y, kind='all'){
+lm_test_haplotypes = function(X, Y, kind='all', verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   if(kind != 'single'){
 
@@ -83,8 +93,8 @@ lm_test_haplotypes = function(X, Y, kind='all'){
   return(final_results)
 }
 
-#' haplotype bloc model test
-#' association between a given bloc and a phenotype
+#' Haplotype bloc model test
+#' @description Association between a given bloc and a phenotype
 #' the common haplotype is removed for this test
 #' warning : this function should not be used explicitly
 #' users must only call the lm_test_haplotypes function and specify bloc as kind parameters value
@@ -98,8 +108,8 @@ bloc_test <- function(sum_Lm){
                                             pf(x[1], x[2], x[3], lower.tail = FALSE)})))
 }
 
-#' complete model haplotype test
-#' association between each haplotype of a given bloc and a phenotype
+#' Complete model haplotype test
+#' @description Association between each haplotype of a given bloc and a phenotype
 #' the common haplotype is removed for this test
 #' warning : this function should not be used explicitly
 #' users must only call the lm_test_haplotypes function and specify complete as kind parameters value
@@ -113,8 +123,9 @@ complete_test <- function(sum_Lm){
                                            x[2:nrow(x), ncol(x)]}, varL))
 }
 
-#' variant (single) haplotype model test
-#' the common haplotype is keeped for this test
+#' Variant (single) haplotype model test
+#' @description Association between a given bloc and a phenotype.
+#' The common haplotype is keeped for this test
 #' @param X haplotype counts matrix
 #' @param Y phenotype or residues matrix
 #'

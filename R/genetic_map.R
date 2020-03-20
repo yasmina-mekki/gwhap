@@ -1,22 +1,33 @@
-#' create an augmented genetic map
+#' Create an augmented genetic map
+#'
+#' @description  Create an augmented genetic map
 #'
 #' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
 #' @param genetic_map_dir i.e. rutgers map
-#' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved. FALSE by default.
-#' @param map_name the genetic map name. Two maps name are available : rutgers, 1000_genome and 1000_genome_interpolated. rutgers by default.
-#' @param output A path to a file where the augmented genetic map will be saved.
+#' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved as a txt file. FALSE by default.
+#' @param map_name the genetic map name. Three maps name are available : rutgers, 1000_genome and 1000_genome_interpolated.
+#' 'rutgers' by default.
+#' @param output A dir path where the augmented genetic map will be saved.
+#' @param verbose silent warning messages. FALSE by default.
 #'
-#' @return if save_genetic_map == TRUE, then the augmented genetic map is saved. Otherwise, it will return a list of dataframe.
+#' @return if save_genetic_map == TRUE, then the augmented genetic map is saved.
+#' The format of the output would be one txt file per chromosome.
+#' Each txt file would have the following information:
+#' each line represent a SNP. The columns represent the centimorgan information, snp's position, its rs id and chromosome code.
+#' Otherwise, it will return a list of dataframe.
 #' @import data.table
 #' @import readr
 #' @import tools
 #' @export
-create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE, output=''){
+create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE, output='', verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   # read the snp physical positions
 
   # read the one bim file for the whole autosome
-  if('bim'==file_ext(snp_physical_positions)){snp_list = get_bim_file(snp_physical_positions)}
+  if('bim' == file_ext(snp_physical_positions)){snp_list = get_bim_file(snp_physical_positions)}
 
   # one bgi file per chromosome. read each one of them and concatenate them into one dataframe
   else{
@@ -25,12 +36,16 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
       bgi_file_path = sprintf('%schr%s_v2.bgen.bgi', snp_physical_positions, chr)
       # check if file path exist
       if(file.exists(bgi_file_path)){
+
         # get bgi file
         tmp = get_bgi_file(bgi_file_path)
+
         # add chromosome code
         tmp$chromosome = chr
+
         # change column name for correspondance with bim file
         colnames(tmp) <- c('chromosome', 'bp', 'snp', 'number_of_alleles', 'allele1', 'allele2', 'file_start_position', 'size_in_bytes')
+
         # concatenation
         snp_list  = rbind(snp_list, tmp)
       }
@@ -40,12 +55,12 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
   # create the augmented genetic map
   gen_map_updated = list()
   for (chr in unique(snp_list$chromosome)){
-    
-    # read the genetic map. # use Sys.glob instead of specifying the path
+
+    # read the genetic map
     if(map_name == 'rutgers'){chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))}
     if(map_name == '1000_genome_interpolated'){chr_map = get_1000_genome_interpolated_map(sprintf('%s/chr%s.interpolated_genetic_map.gz', genetic_map_dir, chr))}
-    if(map_name == '1000_genome'){chr_map = get_1000_genome_map(sprintf('%s/genetic_map_chr%s_combined_b37.txt', genetic_map_dir, chr))} 
-    
+    if(map_name == '1000_genome'){chr_map = get_1000_genome_map(sprintf('%s/genetic_map_chr%s_combined_b37.txt', genetic_map_dir, chr))}
+
     # get interval of position defined by min-1 and max+1 neighbour variant in the genetic map
     interp_in = chr_map$position > (min(snp_list$bp[snp_list$chromosome == chr])-1) & chr_map$position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
@@ -63,7 +78,7 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
     gen_map_updated[[chr]]  = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
   }
 
-  # if save_genetic_map, write the augmented genetic map
+  # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
   if (save_genetic_map) {
     for (chr in unique(snp_list$chromosome)){
       file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
@@ -71,12 +86,12 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
     }
     return(0)
   }
-  # if not save_genetic_map, return the augmented genetic map as a list of dataframe
+  # if save_genetic_map equal to FALSE, return the augmented genetic map as a list of dataframe
   return(gen_map_updated)
 }
 
 
-#' use and interpolate genetic map of a chromosome
+#' Use and interpolate genetic map of a chromosome
 #'
 #' @param genetic_map  reference genetic map of a chromosome [BP,cM]
 #' @param snp_list SNP position list to interpolate [BP]
@@ -85,11 +100,11 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
 #' @export
 genetic_map_interp_chr <- function(genetic_map, snp_list){
 
-    #builiding the interpolation model using all reference positions in chromosome chr
+    # builiding the interpolation model using all reference positions in chromosome chr
     gen_map_approx.fun <- stats::approxfun(genetic_map[,1],
                                            genetic_map[,2],
                                            ties="ordered")
-    #snps to interpolate in the chromosome chr
+    # snps to interpolate in the chromosome chr
     snp_interp = gen_map_approx.fun(snp_list)
 
     # update the genetic map
@@ -101,7 +116,7 @@ genetic_map_interp_chr <- function(genetic_map, snp_list){
 }
 
 
-#' use and interpolate of all chromosomes using a reference map  object
+#' Use and interpolate of all chromosomes using a reference map  object
 #'
 #' @param genetic_map_all  reference genetic map of all chromosomes [chr,BP,cM]
 #' @param snp_list SNP position list to interpolate in all chromosomes [chr,BP]

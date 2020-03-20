@@ -24,13 +24,6 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 ```
 
 
-# Installation of `gwhap`
-
-```R
-if (!require(devtools)){install.packages("devtools")}
-devtools::install_github("yasmina-mekki/gwhap")
-```
-
 # Download the Rutgers genetic map
 
 Download the Rutgers genetic map v3 (Kosambi)
@@ -63,10 +56,6 @@ df_blocks = create_blocks(augmented_map_df, delta=1e-3, save_blocs=TRUE, output=
 
 Set parameters :
 ```R
-library(rlist)
-library(data.table)
-library(readr)
-
 # get blocs
 blocs_dir = '/neurospin/tmp/ymekki/new_repo/gwhap/blocs'
 df_blocs  = get_blocs(blocs_dir)
@@ -160,18 +149,17 @@ haplotype_one_bloc = haplotype_combined[, columns_blocs]
 
 # Test the haplotypes
 
-The function is designed to handle one blocs at the time. In order to apply the three test on the whole haplotypes, we need to loop over them.
+The function is designed to handle one blocs at the time. In order to apply the three test on all haplotypes, we need to loop over them.
 
 In order to reduce the run time, we use the mcmapply function. Basically, this function will paralelize the process.
 
 Please refer to the code below to implement the tests using all haplotypes determined in the above step.
 
 
-The haplotypes are identified by an index. You need to coorespond it to the subject's ID.
+The haplotypes are identified by an index. You need to corespond it to the subject's ID.
 
-First step: get the subject's index (done by the code below)
-
-Second step: correspond the index to the subject's ID (done in the lm_test_haplotypes_per_bloc function)
+* First step: get the subject's index (done by the code below)
+* Second step: correspond the index to the subject's ID (done in the lm_test_haplotypes_per_bloc function)
 
 ```R
 chr = "chr5"
@@ -284,12 +272,5 @@ colnames(Y_residualisee) = c('connectivity_residualisee')
 
 Y_cov_residualisee = cbind(Y_residualisee, cov_pheno_UKB)
 Y_filtred_residualisee = Y_cov_residualisee[, c('IID', 'connectivity_residualisee')]
-
-```
-
-# Phenome Wide Association Studies
-In order to apply the above process on all your phenotypes, you need to loop over them as follow:
-
-```R
 
 ```

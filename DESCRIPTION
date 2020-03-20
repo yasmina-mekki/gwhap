@@ -34,4 +34,5 @@ Imports:
     tools,
     rbgen,
     dummies,
-    R.utils
+    R.utils,
+    RSQLite

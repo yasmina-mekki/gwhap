@@ -26,14 +26,22 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 
 # Installation of `gwhap`
 
+There are two ways to obtain the gwhap source package:
+
+* Using the CRAN
 ```R
-if (!require(devtools)){install.packages("devtools")}
-devtools::install_github("yasmina-mekki/gwhap")
+install.packages('gwhap')
 ```
-The gwhap package implies the use of a version of R; 3.6 and higher as well as a certain number of installed libraries.
+
+* Using github
+```R
+devtools::install_github('yasmina-mekki/gwhap')
+```
+
+The gwhap package implies the use of a version of R **(3.6.2 and higher)** as well as a certain number libraries.
 
 In order to facilitate the use of it, here is a recipe of a singularity image containing all the necessary.
-Please refer to the github repo, for more explanation to how to generate it.
+Please refer to the github repo, for more explanation about how to generate it.
 
 ```R
 devtools::install_github("yasmina-mekki/gwhap_singularity_image")
@@ -42,7 +50,8 @@ devtools::install_github("yasmina-mekki/gwhap_singularity_image")
 
 # Create the augmented genetic map
 
-Currently, only threee kind of map are took into accounting : 
+Currently, only threee kind of map are took into account:
+
 * Rutgers genetic map v3 (Kosambi)
 * 1000_genome
 * 1000_genome_interpolated
@@ -61,16 +70,14 @@ interpolate a new map for SNPs using either:
 snp_physical_positions = "path_to_your_snps_file/snp_file.bim"
 ```
 
-* bgen file
+* bgi/bgen file
 ```R
 snp_physical_positions = "path_to_your_bgen_file/ukb_hap_"
 ```
 Create the augmented genetic map as follow:
 
 ```R
-rutgers_map_dir = "path_to_your_rutgers_map_dir"
-output_dir = 'path_to_your_output_dir'
-create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=rutgers_map_dir, map_name='rutgers', save_genetic_map=TRUE, output=output_dir)
+create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir='path_to_your_rutgers_map_dir', map_name='rutgers', save_genetic_map=TRUE, output='path_to_your_output_dir')
 ```
 
 
@@ -81,14 +88,12 @@ create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, gene
 Before creating the clocs, you need to load the map created above
 
 ```R
-augmented_genetic_map_dir = 'path_to_your_output_dir'
-augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir, chromosomes=1:23)
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir='path_to_your_output_dir', chromosomes=1:23)
 ```
 
 Create blocs with a single delta
 ```R
-output_dir = 'path_to_your_output_dir'
-create_blocks(augmented_map_df, delta=1e-3, save_blocs=TRUE, output=output_dir)
+create_blocs(genetics_map=augmented_map_df, delta=1e-3, save_blocs=TRUE, output='path_to_your_output_dir')
 ```
 
 Create blocs with multiple values of delta
@@ -96,42 +101,41 @@ Create blocs with multiple values of delta
 deltas = c(1e-3, 2.5e-3, 5e-3, 7.5e-3)
 dfs_blocks = data.frame()
 for(delta in deltas){
-  df_blocks_tmp = create_blocks(augmented_map_df, delta=delta, save_blocs=FALSE)
+  df_blocks_tmp = create_blocs(genetics_map=augmented_map_df, delta=delta, save_blocs=FALSE)
   dfs_blocks <- rbind(dfs_blocks, df_blocks_tmp)
 }
 ```
 
 ##  Blocs visualization
 
+Assuming that df_blocs is your bloc data frame already loaded
+
 Blocs distribution plot
 
-* All chromosomes
-```
-haplotype_block_distribution_per_delta = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5))
-save_plot(haplotype_block_distribution_per_delta, paste0(output, 'haplotype_block_distribution_per_delta.pdf'))
-```
-
-* Per chromosome
+* Blocs distribution for all chromosomes and optionnaly for different values of delta
 ```R
-haplotype_block_distribution_per_chr = haplotype_block_distribution(dfs_blocks, xlim=c(1.590790e-10, 1), ylim=c(0, 1.5), per_chromosome=TRUE)
-save_plot(haplotype_block_distribution_per_chr, paste0(output, 'haplotype_block_distribution_per_chr.pdf'))
+haplotype_bloc_distribution_per_delta = haplotype_bloc_distribution(df_blocs)
+save_plot(haplotype_bloc_distribution_per_delta, paste0('output_path/', 'haplotype_bloc_distribution_per_delta.png'))
 ```
 
-Karyotype
+* Blocs distribution per chromosome and optionnaly for different values of delta
 ```R
-df_blocs_delta_3 = dfs_blocks[dfs_blocks$delta==0.001,]
-karyotype_plot_obj = karyotype_plot(df_blocs_delta_3)
-save_plot(karyotype_plot_obj, paste0(output, 'karyotype_plot.pdf'))
+haplotype_bloc_distribution_per_chr = haplotype_bloc_distribution(df_blocs, per_chromosome=TRUE)
+save_plot(haplotype_bloc_distribution_per_chr, paste0('output_path/', 'haplotype_bloc_distribution_per_chr.png'))
 ```
 
+Karyotype plot
+```R
+karyotype_plot_obj = karyotype_plot(df_blocs)
+save_plot(karyotype_plot_obj, paste0('output_path/', 'karyotype_plot.png'))
+```
 
 # Determine the haplotypes
 
 Before determining the haplotypes, you need to load the blocs created above
 
 ```R
-augmented_genetic_map_dir = 'path_to_your_output_dir'
-augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir, chromosomes=1:23)
+blocs_df = get_blocs(augmented_genetic_map_dir='path_to_your_output_dir')
 ```
 
 Here is an example for one bloc
@@ -169,15 +173,5 @@ test_results = lm_test_haplotypes(X, Y, kind='all')
 
 ***Warning:***
 
-One should know that the test haplotype function assume that the Y are residualized. Indeed, it does not take into account the covariates
+One should know that the test haplotype function assume that the Y are residualized. Indeed, it does not take into account the covariates.
 
-
-# Phenotypes distribution plots
-
-Phenotypes distribution plots
-
-```R
-phenotypes_path = Sys.glob(file.path("path_to_your_phenotypes/" , '*'))
-phenotype_distribution_plot = phenotype_distribution(phenotypes_path = phenotypes_path)
-save_plot(phenotype_distribution_plot, paste0(output, 'phenotype_distribution_plot.pdf'))
-```

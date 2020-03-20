@@ -1,0 +1,131 @@
+---
+title: "Error example test"
+output:
+  #rmarkdown::html_vignette:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Error example test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(gwhap)
+```
+
+
+
+# Test the haplotypes
+
+résultat dans /neurospin/ukb/derivatives/brainomic_openings/reduce/FCMpost_left_block.gz (juste copié)
+
+```R
+library(readr)
+sien = read_delim('/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/FCMpost_left_block', delim=',')
+mien = read_delim('/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/lm_test/chr_1/bloc_test_results.tsv', delim='\t')
+
+start = vapply(strsplit(sien$rNames,"_"), `[`, 2, FUN.VALUE=character(1))
+end = vapply(strsplit(sien$rNames,"_"), `[`, 3, FUN.VALUE=character(1))
+chr_code = vapply(strsplit(sien$rNames,"_"), `[`, 1, FUN.VALUE=character(1))
+
+sien$start = start
+sien$end = end
+sien$chr_code = chr_code
+
+sien_chr1 = sien[sien$chr_code == 'chr1',]
+
+results_merged = merge(mien, sien, by.x='start', by.y='start')
+diff = results_merged$p_value - results_merged$pv
+
+mean(diff)
+```
+
+chr1 ==> 0.02458081
+chr14 ==> 0.004238826
+chr21 ==> 0.006595106
+
+
+Est ce au niveau des phenotypes ?
+
+
+```R
+i=1
+haplotypes_path = '/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/haplotypes/haplotypes_'
+load(sprintf('%schr%s.RData', haplotypes_path, i))
+
+
+blocs = '215146807_215154276'
+columns_blocs = str_subset(colnames(haplotype_combined), blocs)
+haplotype_one_bloc = haplotype_combined[, columns_blocs]
+setDT(haplotype_one_bloc, keep.rownames = TRUE)[]
+
+sample_semi_path = '/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/v2/ukb25251_hap'
+sample_index_file = read_delim(sprintf('%s_%s_v2_s487395.sample', sample_semi_path, chr), delim='  ')
+# get the index columns
+setDT(sample_index_file, keep.rownames = TRUE)[]
+df_tmp_merged = merge(sample_index_file, haplotype_one_bloc, by="rn")
+
+phenotypes_sulci = fread("/neurospin/ukb/workspace/pheno_boxcox/all_pheno_res.tsv")
+Y_filtred = phenotypes_sulci[, c('IID', 'FCMpost_left')]
+df_merged = merge(df_tmp_merged, Y_filtred, by.x = 'ID_2', by.y = 'IID')
+
+X_teii = df_merged[, ..columns_blocs]
+lm_test_haplotypes(X_teii, dplyr::select(phenotypes_sulci, c('FCMpost_left')), kind='bloc')
+```
+
+|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
+|:------------|:-----|:------------|------------|:-----|
+|1 215146807| 215154276| 0.4018786  |     15612 |           24|
+
+
+```R
+X_teou=fread("/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/blocks_19k_gz/all_sulci_boxcox.csv.hapDF_chr1_215146807_215154276.gz")
+lm_test_haplotypes(X_teou, dplyr::select(phenotypes_sulci, c('FCMpost_left')), kind='bloc')
+```
+
+
+|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
+|:------------|:-----|:------------|------------|:-----|
+| 1 215146807| 215154276| 5.029542e-24 |      15612  |          23|
+
+
+
+Est ce que c'est au niveau des haplotypes ?
+
+```R
+X_teou=fread("/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/blocks_19k_gz/all_sulci_boxcox.csv.hapDF_chr1_215146807_215154276.gz")
+phenotypes_sulci_not_residualisee = fread("/neurospin/ukb/workspace/pheno_boxcox/all_sulci_boxcox.tsv")
+lm_test_haplotypes(X_teou, dplyr::select(phenotypes_sulci_not_residualisee, c('FCMpost_left')), kind='bloc')
+```
+
+
+|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
+|:------------|:-----|:------------|------------|:-----|
+| 1 215146807 | 215154276|  0.6462266 |       15612  |           23| 
+
+
+```R
+mien[mien$start == '215146807',]
+lm_test_haplotypes(X_teii, dplyr::select(phenotypes_sulci_not_residualisee, c('FCMpost_left')), kind='bloc')
+```
+
+
+|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
+|:------------|:-----|:------------|------------|:-----|
+|1 215146807 |215154276| 0.7097015|       15612  |          24|
+
+
+
+## phenotype residualisee
+
+
+==> all_pheno_res.tsv n'est pas le résidu de all_sulci_boxcox.tsv ??????
+

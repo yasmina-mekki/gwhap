@@ -24,14 +24,6 @@ RESOURCE_ROOT = "<YOUR_LOCAL_RESOURCE_FS>"
 ```
 
 
-# Installation of `gwhap`
-
-```R
-if (!require(devtools)){install.packages("devtools")}
-devtools::install_github("yasmina-mekki/gwhap")
-```
-
-
 # Create the augmented genetic map
 
 
