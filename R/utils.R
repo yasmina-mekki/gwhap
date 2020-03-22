@@ -263,20 +263,20 @@ summary_haplotypes_test <- function(test_path, threshold = 5e-6, verbose=FALSE){
   # init
   test_possible = list('bloc_test_results', 'complete_test_results', 'single_test_results')
 
-  # create a summary dir
-  dir.create(sprintf('%s/summary', test_path))
-
   # init the outputs data frames
   bloc_test_results     = data.frame()
   complete_test_results = data.frame()
   single_test_results   = data.frame()
 
   # read each test and concatenate it into one dataframe for all blocs and chromosomes
-  chromosme_test_path = Sys.glob(file.path(test_path, '/*'))
+  chromosme_test_path = Sys.glob(file.path(test_path, '*'))
+
+  # create a summary dir
+  dir.create(sprintf('%s/summary', test_path))
 
   for(chromosome_path in chromosme_test_path){
     for(test in test_possible){
-      unit_test_path = Sys.glob(file.path(sprintf('%s/%s', chromosome_path, test), '/*'))
+      unit_test_path = Sys.glob(file.path(sprintf('%s/%s', chromosome_path, test), '*'))
       for(unit_path in unit_test_path){
         if(test=='bloc_test_results'){bloc_test_results <- rbind(bloc_test_results, data.frame(read_tsv(unit_path)))}
         if(test=='complete_test_results'){complete_test_results <- rbind(complete_test_results, data.frame(read_tsv(unit_path)))}
