@@ -1,8 +1,8 @@
 ---
 title: "Error example test"
 output:
-  #rmarkdown::html_vignette:
-  BiocStyle::html_document:
+  rmarkdown::html_vignette:
+  #BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Error example test}
@@ -25,38 +25,10 @@ library(gwhap)
 
 # Test the haplotypes
 
-résultat dans /neurospin/ukb/derivatives/brainomic_openings/reduce/FCMpost_left_block.gz (juste copié)
+Pour le même bloc, on prend trois différents haplotypes et on test leur différence.
 
 ```R
-library(readr)
-sien = read_delim('/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/FCMpost_left_block', delim=',')
-mien = read_delim('/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/lm_test/chr_1/bloc_test_results.tsv', delim='\t')
-
-start = vapply(strsplit(sien$rNames,"_"), `[`, 2, FUN.VALUE=character(1))
-end = vapply(strsplit(sien$rNames,"_"), `[`, 3, FUN.VALUE=character(1))
-chr_code = vapply(strsplit(sien$rNames,"_"), `[`, 1, FUN.VALUE=character(1))
-
-sien$start = start
-sien$end = end
-sien$chr_code = chr_code
-
-sien_chr1 = sien[sien$chr_code == 'chr1',]
-
-results_merged = merge(mien, sien, by.x='start', by.y='start')
-diff = results_merged$p_value - results_merged$pv
-
-mean(diff)
-```
-
-chr1 ==> 0.02458081
-chr14 ==> 0.004238826
-chr21 ==> 0.006595106
-
-
-Est ce au niveau des phenotypes ?
-
-
-```R
+X_teou=fread("/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/blocks_19k_gz/all_sulci_boxcox.csv.hapDF_chr1_215146807_215154276.gz")
 i=1
 haplotypes_path = '/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/haplotypes/haplotypes_'
 load(sprintf('%schr%s.RData', haplotypes_path, i))
@@ -65,25 +37,55 @@ load(sprintf('%schr%s.RData', haplotypes_path, i))
 blocs = '215146807_215154276'
 columns_blocs = str_subset(colnames(haplotype_combined), blocs)
 haplotype_one_bloc = haplotype_combined[, columns_blocs]
-setDT(haplotype_one_bloc, keep.rownames = TRUE)[]
+```
+==> results
 
-sample_semi_path = '/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/v2/ukb25251_hap'
-sample_index_file = read_delim(sprintf('%s_%s_v2_s487395.sample', sample_semi_path, chr), delim='  ')
-# get the index columns
-setDT(sample_index_file, keep.rownames = TRUE)[]
-df_tmp_merged = merge(sample_index_file, haplotype_one_bloc, by="rn")
-
-phenotypes_sulci = fread("/neurospin/ukb/workspace/pheno_boxcox/all_pheno_res.tsv")
-Y_filtred = phenotypes_sulci[, c('IID', 'FCMpost_left')]
-df_merged = merge(df_tmp_merged, Y_filtred, by.x = 'ID_2', by.y = 'IID')
-
-X_teii = df_merged[, ..columns_blocs]
-lm_test_haplotypes(X_teii, dplyr::select(phenotypes_sulci, c('FCMpost_left')), kind='bloc')
+```R
+mean(X_teou$chr1_215146807_215154276_0000011 - haplotype_one_bloc$NA.chr1_215146807_215154276_0000011)
 ```
 
-|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
-|:------------|:-----|:------------|------------|:-----|
-|1 215146807| 215154276| 0.4018786  |     15612 |           24|
+[1] 0
+
+```R
+mean(haplotype_one_bloc$NA.chr1_215146807_215154276_1000110 - X_teou$chr1_215146807_215154276_1000110)
+```
+
+[1] 0
+
+```R
+mean(haplotype_one_bloc$NA.chr1_215146807_215154276_0010010 - X_teou$chr1_215146807_215154276_0010010)
+```
+
+[1] 0
+
+
+
+
+# residualisation
+
+```R
+cov_UKB = fread('/neurospin/ukb/workspace/pheno_boxcox/covar_SexAgeMRI_10PCSArray_19k.cov')
+X_covar = c("IID", "Array", "Sex", "Age", "PC1", "PC2", "PC3", "PC4", "PC5", "PC6", "PC7", "PC8", "PC9", "PC10")
+
+phenotypes_sulci = fread("/neurospin/ukb/workspace/pheno_boxcox/all_sulci_boxcox.tsv")
+phenotype_filtred = phenotypes_sulci[, c('IID', 'FCMpost_left')]
+
+Y_filtred_residualisee = phenotype_residualisation(phenotype=phenotype_filtred, covariates=cov_UKB[, ..X_covar], verbose=FALSE)
+
+res = fread("/neurospin/ukb/workspace/pheno_boxcox/all_pheno_res.tsv")
+res_f = dplyr::select(res, c('IID', 'FCMpost_left'))
+
+results_merged = merge(res_f, Y_filtred_residualisee, by.x='IID', by.y='IID')
+```
+
+==> all_pheno_res.tsv n'est pas le résidu de all_sulci_boxcox.tsv ??????
+
+# test
+
+
+
+
+## même fonction pour le test mais les haplotypes une fois avec les tiens, une fois lautre
 
 
 ```R
@@ -94,38 +96,85 @@ lm_test_haplotypes(X_teou, dplyr::select(phenotypes_sulci, c('FCMpost_left')), k
 
 |      start  |     end|   p_value| nb_subjects | nb_haplotypes|
 |:------------|:-----|:------------|------------|:-----|
-| 1 215146807| 215154276| 5.029542e-24 |      15612  |          23|
-
-
-
-Est ce que c'est au niveau des haplotypes ?
-
-```R
-X_teou=fread("/neurospin/ukb/genetic/GENETIC_DATA_500k/HAPLOTYPES/blocks_19k_gz/all_sulci_boxcox.csv.hapDF_chr1_215146807_215154276.gz")
-phenotypes_sulci_not_residualisee = fread("/neurospin/ukb/workspace/pheno_boxcox/all_sulci_boxcox.tsv")
-lm_test_haplotypes(X_teou, dplyr::select(phenotypes_sulci_not_residualisee, c('FCMpost_left')), kind='bloc')
-```
-
-
-|      start  |     end|   p_value| nb_subjects | nb_haplotypes|
-|:------------|:-----|:------------|------------|:-----|
-| 1 215146807 | 215154276|  0.6462266 |       15612  |           23| 
+| 215146807| 215154276| 5.029542e-24 |      15612  |          23|
 
 
 ```R
-mien[mien$start == '215146807',]
-lm_test_haplotypes(X_teii, dplyr::select(phenotypes_sulci_not_residualisee, c('FCMpost_left')), kind='bloc')
-```
+bloc_test_path = Sys.glob(file.path("/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/lm_test/chr_1/bloc_test_results/" , '*'))
 
+bloc_test_df =  data.frame()
+for(path in bloc_test_path){
+  bloc_test_df <- rbind(bloc_test_df, data.frame(read_tsv(path)))
+}
+```
+```R
+bloc_test_df[bloc_test_df$start==215146807,]
+```
 
 |      start  |     end|   p_value| nb_subjects | nb_haplotypes|
 |:------------|:-----|:------------|------------|:-----|
-|1 215146807 |215154276| 0.7097015|       15612  |          24|
+| 215146807 |  215154276  | 5.029542e-24  |     15612     |       23|
+
+==> ok pour les haplotypes
 
 
 
-## phenotype residualisee
+## comparaison des résultats pour le test bloc pour le chromosome 1
 
 
-==> all_pheno_res.tsv n'est pas le résidu de all_sulci_boxcox.tsv ??????
+Pour le chromosme 1, on test la différence des p value en moyenne sur l'ensemble du chromosme pour le test bloc et pour le phénotype FCMpost_left_block.
+
+```R
+sien = read_delim('/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/FCMpost_left_block', delim=',')
+
+start = vapply(strsplit(sien$rNames,"_"), `[`, 2, FUN.VALUE=character(1))
+end = vapply(strsplit(sien$rNames,"_"), `[`, 3, FUN.VALUE=character(1))
+chr_code = vapply(strsplit(sien$rNames,"_"), `[`, 1, FUN.VALUE=character(1))
+
+sien$start = start
+sien$end = end
+sien$chr_code = chr_code
+```
+
+
+```R
+bloc_test_path = Sys.glob(file.path("/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/lm_test/chr_1/bloc_test_results/" , '*'))
+
+bloc_test_df =  data.frame()
+for(path in bloc_test_path){
+  bloc_test_df <- rbind(bloc_test_df, data.frame(read_tsv(path)))
+}
+```
+
+```R
+results_merged = merge(bloc_test_df, sien, by.x='start', by.y='start')
+diff = results_merged$p_value - results_merged$pv
+mean(diff)
+```
+
+==> [1] 1.950054e-05
+
+
+
+
+```R
+results_merged[results_merged$start==215146807,]
+```
+
+|start|    end.x|      p_value| nb_subjects| nb_haplotypes |       pheno | test  |    rNames              | mafs     |   pv  | pvnum      |  end.y |chr_code |
+|:----|:--------|:------------|------------|:--------------|:------------|:------|:-----------------------|----------|:------|:-----------|:-------|:--------|
+|215146807|215154276| 5.029542e-24|      15612 |           23  | FCMpost_left| block |chr1_215146807_215154276| 15612 |4.96342e-24 |    4   |215154276|     chr1|
+
+
+
+
+==> Ce n'est pas le même test qui est réalisé.
+
+
+
+
+
+
+
+
 
