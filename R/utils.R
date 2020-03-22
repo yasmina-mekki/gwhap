@@ -156,7 +156,7 @@ get_bgen_file <- function(file_path, start, end, samples=samples, chromosome='',
 #' @export
 #'
 write_genetic_map <- function(dataframe, output){
-  write.table(dataframe, output, sep="\t", row.names=FALSE)
+  write.table(dataframe, output, sep="\t", row.names=FALSE, quote=FALSE)
 }
 
 
@@ -212,7 +212,88 @@ get_blocs <- function(blocs_dir, chromosomes=1:22){
 #' @export
 #'
 write_blocs <- function(dataframe, output){
-  write.table(dataframe, output, sep="\t", row.names=FALSE)
+  write.table(dataframe, output, sep="\t", row.names=FALSE, quote=FALSE)
+}
+
+
+#' Save haplotypes
+#'
+#' @description Save haplotypes per chromosome. Each rows represent the subject with their IID as index.
+#' Each column represent the haplotypes name that basicaly contain the follow information chromosome code, bloc start bp, end bloc bp and the haplotypes code
+#' @param haplotype_combined haplotype dataframe. The rows correspond to the subject while the column correspond to the haplotypes name
+#' @param chromosome chromosome code
+#' @param output A dir path where the haplotypes are saved
+#'
+#' @return None
+#' @import utils
+#' @export
+#'
+save_haplotypes <- function(haplotype_combined, chromosome, output){
+
+  # set the output path
+  haplotype_combined_path = sprintf('%s/haplotypes_%s.tsv', output, chromosome)
+
+  # remove NA in the column name added by cbind
+  colnames(haplotype_combined) = vapply(strsplit(colnames(haplotype_combined),"[.]"), `[`, 2, FUN.VALUE=character(1))
+
+  # save the haplotype as tsv file
+  #write.table(haplotype_combined, haplotype_combined_path, sep="\t", row.names=TRUE, quote=FALSE)
+
+  # save the haplotypes as .RData
+  save(haplotype_combined, file=sprintf('%s/haplotypes_%s.RData', output, chromosome), compress=T)
+}
+
+
+#' Summary haplotypes test
+#'
+#' @description Filter on the results obtained and keep only the significant p values
+#' @param test_path A dir path where the tests are saved
+#' @param threshold threshold
+#' @param verbose silent warning messages. FALSE by default.
+#' @import utils
+#'
+#' @return None
+#' @export
+#'
+summary_haplotypes_test <- function(test_path, threshold = 5e-6, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
+
+  # init
+  test_possible = list('bloc_test_results', 'complete_test_results', 'single_test_results')
+
+  # create a summary dir
+  dir.create(sprintf('%s/summary', test_path))
+
+  # init the outputs data frames
+  bloc_test_results     = data.frame()
+  complete_test_results = data.frame()
+  single_test_results   = data.frame()
+
+  # read each test and concatenate it into one dataframe for all blocs and chromosomes
+  chromosme_test_path = Sys.glob(file.path(test_path, '/*'))
+
+  for(chromosome_path in chromosme_test_path){
+    for(test in test_possible){
+      unit_test_path = Sys.glob(file.path(sprintf('%s/%s', chromosome_path, test), '/*'))
+      for(unit_path in unit_test_path){
+        if(test=='bloc_test_results'){bloc_test_results <- rbind(bloc_test_results, data.frame(read_tsv(unit_path)))}
+        if(test=='complete_test_results'){complete_test_results <- rbind(complete_test_results, data.frame(read_tsv(unit_path)))}
+        if(test=='single_test_results'){single_test_results <- rbind(single_test_results, data.frame(read_tsv(unit_path)))}
+      }
+    }
+  }
+
+  # filtre on the significant p values
+  bloc_test_results = bloc_test_results[bloc_test_results$p_value < threshold, ]
+  complete_test_results = complete_test_results[complete_test_results$p_value < threshold, ]
+  single_test_results = single_test_results[single_test_results$p_value < threshold, ]
+
+  # write the summary
+  write.table(bloc_test_results, sprintf('%s/summary/bloc_test_results.tsv', test_path), sep="\t", row.names=FALSE, quote=FALSE)
+  write.table(complete_test_results, sprintf('%s/summary/complete_test_results.tsv', test_path), sep="\t", row.names=FALSE, quote=FALSE)
+  write.table(single_test_results, sprintf('%s/summary/single_test_results.tsv', test_path), sep="\t", row.names=FALSE, quote=FALSE)
 }
 
 
