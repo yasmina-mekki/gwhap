@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+man/*
+ressource/*
+test_modules/*
+NAMESPACE
+devtools_history.R
+inst/doc
+vignettes/summary*
+vignettes/error_example*
