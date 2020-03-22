@@ -73,6 +73,8 @@ lm_test_haplotypes = function(X, Y, kind='all', verbose=FALSE){
     # perform the test
     complete_test_results = complete_test(sum_Lm)
 
+    #if(!is.list(complete_test_results) | length(complete_test_results)<=1){stop("Something went wrong ...")}
+
     # set the results into the right format
     results  = data.frame()
     for (i in 1:length(complete_test_results$phenotype)){
@@ -166,9 +168,49 @@ single_test <- function(X, Y){
   # set the output into the right format
   results  = data.frame()
   for (i in 1:length(pv_Var)){
-    results = rbind(results, data.frame(strsplit(col_orgX[i], '_')[[1]][2], strsplit(col_orgX[i], '_')[[1]][3], col_orgX[i], pv_Var[[i]]$phenotype, nrow(Y), ncol(X)))
+    results = rbind(results, data.frame(strsplit(col_orgX[i], '_')[[1]][2],
+                                        strsplit(col_orgX[i], '_')[[1]][3],
+                                        col_orgX[i], pv_Var[[i]]$phenotype,
+                                        nrow(Y), ncol(X)))
   }
   names(results) <- c('start', 'end', 'haplotype','p_value','nb_subjects', 'nb_haplotypes')
 
   return(results)
+}
+
+
+
+#' Phenotype residualisation
+#'
+#' @param verbose silent warning messages. FALSE by default.
+#' @param phenotype data frame structure with the participant IID and one phenotype
+#' @param covariates data frame structure with the participant IID and the covariates
+#'
+#' @return phenotype residualised.
+#' @importFrom stats lm
+#' @importFrom stats na.omit
+#' @export
+#'
+phenotype_residualisation <- function(phenotype, covariates, verbose=FALSE){
+
+  # silent warning messages
+  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
+
+  # merge covariates and the phenotype and remove nan values
+  df_covariates_phenotype = na.omit(merge(covariates, phenotype, by='IID'))
+
+  # set parameters for the linear regression
+  X_column_name = paste(colnames(covariates)[colnames(covariates) != "IID"], collapse = '+')
+  Y_column_name = paste(colnames(phenotype)[colnames(phenotype) != "IID"], collapse = ',')
+
+  # apply linear regression and get summary
+  linear_regression_model = lapply(sprintf("cbind( %s ) ~ %s ", X_column_name, Y_column_name), lm, data=df_covariates_phenotype)
+  summary_model = lapply(linear_regression_model, summary)
+
+  # get the residu
+  Y_residualised = data.frame(summary_model[[1]]$residuals)
+  colnames(Y_residualised) = c('phenotype_residualised')
+
+  # get the phenotype IID and return the data frame
+  return(cbind(Y_residualised, df_covariates_phenotype)[, c('IID', 'phenotype_residualised')])
 }
