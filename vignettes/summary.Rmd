@@ -1,8 +1,8 @@
 ---
 title: "Summary"
 output:
-  #rmarkdown::html_vignette:
-  BiocStyle::html_document:
+  rmarkdown::html_vignette:
+  #BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Summary}

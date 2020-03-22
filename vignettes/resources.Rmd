@@ -1,8 +1,8 @@
 ---
 title: "Resources to use gwhap"
 output: 
-  #rmarkdown::html_vignette:
-  BiocStyle::html_document:
+  rmarkdown::html_vignette:
+  #BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Resources_to_use_gwhap}
