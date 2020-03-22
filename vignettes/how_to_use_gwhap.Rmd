@@ -1,8 +1,8 @@
 ---
 title: "How to use gwhap package"
 output:
-  #rmarkdown::html_vignette:
-  BiocStyle::html_document:
+  rmarkdown::html_vignette:
+  #BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{how_to_use_gwhap}
@@ -156,6 +156,16 @@ haplotypes = determine_haplotypes_per_bloc(chr, start, end, bgnfile, samples_ind
 ```
 
 Please refer to the genome wide example vignette for more code about how to determine the haplotypes using all the blocs.
+
+***Note: ***
+
+In the bgen file, the IID are annonymized.
+It is constitued of, among others, a list of sample that contain the anonymized IID indexed.
+The .sample file is used as a reference table. It contains the IID of the participant indexed.
+Here, the index can be used as a foreign key to toggle from the anonymized IID to the real ones.
+
+***Warning:*** please notice that <a href='https://www.cog-genomics.org/plink/2.0/formats#sample'>.sample</a> file has two header lines.
+Be sure to remove the second header and starting the index account from the second line.
 
 
 # Test the haplotypes
