@@ -5,3 +5,4 @@ ressource/*
 test_modules/*
 NAMESPACE
 devtools_history.R
+inst/doc
