@@ -69,10 +69,11 @@ determine_haplotypes_per_bloc = function(chromosome, start, end, bgen_file, samp
 #' Determine haplotypes per chromosome
 #'
 #' @description Determine haplotypes per chromosome
+#'
 #' @param chromosome chromosome code
 #' @param start a list of integer specifying the starting position (bp) of the bloc.
 #' @param end a list of integer specifying the ending position (bp) of the bloc.
-#' @param bgen_file
+#' @param bgen_file A path to a .bgen file for the desired chromosome.
 #' @param sample_iid a list of participant ID. It correspond to the ID_2 in the .sample file
 #' @param sample_bgen_iid_code a list of index corresponding to the partcipant ID using .bgi/.bgen file. Please notice that, in the bgen format the participant IDs are anonymized.
 #' In order to get the correspondance, you need to look at the .sample file.
@@ -87,7 +88,6 @@ determine_haplotypes_per_bloc = function(chromosome, start, end, bgen_file, samp
 #' @import parallel
 #' @export
 #'
-#' @examples
 determine_haplotypes_per_chromosome <- function(chromosome, start, end, bgen_file, sample_iid, sample_bgen_iid_code, max_entries_per_sample=4, nb_core=detectCores()-2, verbose=FALSE){
 
   # silent warning messages
