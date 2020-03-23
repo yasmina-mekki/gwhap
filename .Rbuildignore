@@ -3,3 +3,9 @@
 ^devtools_history\.R$
 ^data\.table$
 ^readr$
+^ressource/*$
+^test_modules/*$
+^vignettes/*\.png$
+^vignettes/error*\.png$
+^vignettes/error*$
+^vignettes/summary*$
