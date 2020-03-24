@@ -233,7 +233,7 @@ for (i in 1:22){
 }
 ```
 
-* Get the summary of the results. It consists on filtering on the signicant p values.
+* Get the summary of the results. It consist on filtering on the signicant p values.
 
 ```R
 summary_haplotypes_test(output, threshold = 5e-6, verbose=FALSE)
