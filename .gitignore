@@ -1,6 +1,5 @@
 .Rproj.user
 .Rhistory
-man/*
 ressource/*
 test_modules/*
 NAMESPACE
