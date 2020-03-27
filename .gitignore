@@ -3,7 +3,6 @@
 man/*
 ressource/*
 test_modules/*
-NAMESPACE
 devtools_history.R
 vignettes/error_example*
 vignettes/summary*
