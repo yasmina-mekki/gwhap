@@ -2,12 +2,11 @@
 title: "Which visualization are available into gwhap ?"
 output:
   rmarkdown::html_vignette:
-  #BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{visualization}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r, include = FALSE}
@@ -69,7 +68,7 @@ However, the code that implement this plot is available below.
 #' @param verbose silent warning messages. FALSE by default.
 #'
 #' @return karyotype plot object
-#'
+#' 
 #' @import karyoploteR
 #' @importFrom grDevices rainbow
 #' @importFrom dplyr group_by summarise
