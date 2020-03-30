@@ -1,6 +1,6 @@
 Package: gwhap
 Title: Genome wide haplotype
-Version: 0.0.0.9000
+Version: 0.1
 Authors@R: 
     c(person(given = "Yasmina",
            family = "Mekki",
@@ -16,7 +16,8 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    karyoploteR
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0
 Imports: 
@@ -26,7 +27,6 @@ Imports:
     ggplot2,
     dplyr,
     magrittr,
-    karyoploteR,
     datasets,
     grDevices,
     DBI,
