@@ -1,5 +1,5 @@
 Package: gwhap
-Title: Genome wide haplotype
+Title: Genome wide haplotype analysis
 Version: 0.1
 Authors@R: 
     c(person(given = "Yasmina",
