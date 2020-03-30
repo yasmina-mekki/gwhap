@@ -292,5 +292,5 @@ X_covariates_names = c("IID", "Array", "Sex", "Age", "PC1", "PC2", "PC3", "PC4",
 phenotypes_sulci = fread("/neurospin/ukb/workspace/pheno_boxcox/all_sulci_boxcox.tsv")
 phenotype_FCMpost_left = phenotypes_sulci[, c('IID', 'FCMpost_left')]
 
-Y_residualised = phenotype_residualisation(phenotype=phenotype_FCMpost_left, covariates=covariates[, X_covariates_names], verbose=FALSE)
+Y_residualised = phenotype_residualisation(phenotype=phenotype_FCMpost_left, covariates=covariates[, ..X_covariates_names], verbose=FALSE)
 ```

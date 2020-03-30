@@ -204,7 +204,7 @@ phenotype_residualisation <- function(phenotype, covariates, verbose=FALSE){
   Y_column_name = paste(colnames(phenotype)[colnames(phenotype) != "IID"], collapse = ',')
 
   # apply linear regression and get summary
-  linear_regression_model = lapply(sprintf("cbind( %s ) ~ %s ", X_column_name, Y_column_name), lm, data=df_covariates_phenotype)
+  linear_regression_model = lapply(sprintf("cbind( %s ) ~ %s ", Y_column_name, X_column_name), lm, data=df_covariates_phenotype)
   summary_model = lapply(linear_regression_model, summary)
 
   # get the residu
