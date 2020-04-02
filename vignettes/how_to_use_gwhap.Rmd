@@ -85,7 +85,7 @@ create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, gene
 
 ## Create the blocs
 
-Before creating the clocs, you need to load the map created above
+Before creating the blocs, you need to load the map created above
 
 ```R
 augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir='path_to_your_output_dir', chromosomes=1:23)
