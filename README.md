@@ -10,6 +10,10 @@ gwhap, the Genome-Wide HAPlotype analysis package
 
 ## Installation
 
+If run from within a singularity container:
+```bash
+exprot R_LIBS=<PAHTH into the container>/R
+```
 
 ```R
 install.packages("gwhap.xxx.tar.gz",repos=NULL)
@@ -17,7 +21,7 @@ install.packages("gwhap.xxx.tar.gz",repos=NULL)
 
 ## Documentation
 
-package documentation is available after instalation :
+package documentation is available after installation:
 (might need to reload R/rstudio session)
 ```{r package documentation, echo=TRUE}
 package?gwhap 
