@@ -12,7 +12,7 @@ gwhap, the Genome-Wide HAPlotype analysis package
 
 If run from within a singularity container:
 ```bash
-exprot R_LIBS=<PAHTH into the container>/R
+export R_LIBS=<PAHTH into the container>/R
 ```
 
 ```R
