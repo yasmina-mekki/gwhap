@@ -1,5 +1,5 @@
 ---
-title: "How to use gwhap package"
+title: "MODIF: How to use gwhap package"
 output:
   rmarkdown::html_vignette:
   #BiocStyle::html_document:
