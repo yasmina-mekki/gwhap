@@ -133,7 +133,7 @@ for(chromosome in unique(df_blocs$chr)){
   mysamples = dummybg$samples[samples_index]
 
   # determine haplotypes for all blocs of one chromosome
-  haplotype_combined = determine_haplotypes_per_chromosome(chromosome=chromosome,
+  haplotype_combined = legacy_determine_haplotypes_per_chromosome(chromosome=chromosome,
                                                            start,
                                                            end,
                                                            bgen_file = bgen_chromosome_file_path,

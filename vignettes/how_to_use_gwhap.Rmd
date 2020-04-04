@@ -152,7 +152,7 @@ mysamples = c('IID_1', 'IID_2', 'IID_3', 'IID_4', 'IID_5')
 
 * Run the determine haplotype function
 ```R
-haplotypes = determine_haplotypes_per_bloc(chr, start, end, bgnfile, samples_index, mysamples)
+haplotypes = legacy_determine_haplotypes_per_bloc(chr, start, end, bgnfile, samples_index, mysamples)
 ```
 
 Please refer to the genome wide example vignette for more code about how to determine the haplotypes using all the blocs.
