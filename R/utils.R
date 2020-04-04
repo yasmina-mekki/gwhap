@@ -330,3 +330,70 @@ get_rutgers_genMap_SexAverage <- function(genetic_map_path, chr){
   return(data.frame(bp=ru_map$Build37_start_physical_position,
                     cM=ru_map$Sex_averaged_start_map_position))
 }
+
+
+#' Create a S3 object ready to be queried from a haps file
+#'
+#' @param bgen_filename : full path name to the bgen file of the phased data
+#' @return phased_data_loader : the genetetic mapin genMap format
+#'
+#' @import rbgen
+#'
+#' @export
+phased_data_loader.haps <- function(haps_filename) {
+  # check the existence of haps_filename file
+  # TODO
+
+  # read 2 flavors of haps file with 1 or 2 cols describing the snps
+  sep = " "
+  hap_field_num = count.fields(haps_filename, sep=sep)[1]
+  phased_data = read_table(haps_filename, col_names=FALSE)
+  if ((hap_field_num%%2) == 0){
+    phased_data = phased_data[-2]
+  }
+  samples_num = (length(colnames(phased_data)) - 5)/2
+  tmp = sprintf("sample_%d", 0:(samples_num-1))
+  new_col_names =  c(c('chrom', 'rsid', 'pos', 'allele_1', 'allele_2'),
+                     unlist(lapply(tmp, function(s) sprintf("%s_strand%d", s, 1:2))))
+  colnames(phased_data) <- new_col_names
+
+  ret_obj <- list(phased_data=phased_data, is_phased=TRUE, full_fname_haps=haps_filename)
+  class(ret_obj) <- c(class(ret_obj), "phased", "haps")
+
+  return(ret_obj)
+}
+
+
+
+
+#' Create a S3 object ready to be queried from a bgen file
+#'
+#' @param bgen_filename : full path name to the bgen file of the phased data
+#' @return phased_data_loader : the genetetic mapin genMap format
+#'
+#' @import rbgen
+#'
+#' @export
+phased_data_loader.bgen <- function(bgen_filename) {
+  # silent warning messages
+  options(warn=-1)
+
+  # check the existence of bgen.bgi file
+  # TODO
+
+  # open and check that data are phased
+  ranges = data.frame(
+    chromosome = character(0),
+    start = integer(0),
+    end = integer(0)
+  )
+  data = bgen.load(bgen_filename, ranges)
+  print(str(data))
+
+  ret_obj = list(full_fname_bgen=bgen_filename, is_phased=TRUE,
+                 max_entries=4, full_fname_bgi=sprintf("%s.bgi", bgen_filename))
+  class(ret_obj) <- c(class(ret_obj), "phased", "bgen")
+
+  return(ret_obj)
+}
+
