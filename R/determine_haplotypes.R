@@ -49,9 +49,24 @@ getDiploHaplo.bgen <- function(obj, ranges = NULL, samples_selected=NULL, sample
   fn_bgen = obj[['full_fname_bgen']]
   max_entries = obj[['max_entries']]
   fn_bgi = obj[['full_fname_bgi']]
+  chrom_name_degenerated = obj[['chrom_name_degenerated']]
+
+  # test args
+  if (dim(ranges)[1] !=1) {
+      # TOFIX raise an error
+      print("ERROR ranges should be a 1 row data frame")
+  }
+
+  if (chrom_name_degenerated) {
+        rangesfix = data.frame(chromosome="",start=ranges$start, end=ranges$end)
+  }
+  else {
+      rangesfix = ranges
+  }
+
   #
   phased_data.bgen = bgen.load(fn_bgen,
-                               ranges=ranges,
+                               ranges=rangesfix,
                                samples = samples_selected,
                                max_entries=max_entries,
                                index.filename = fn_bgi)
@@ -76,10 +91,11 @@ getDiploHaplo.bgen <- function(obj, ranges = NULL, samples_selected=NULL, sample
 #' @import dummies
 #' @export
 #'
-determine_haplotypes_per_bloc <- function(phased_data,
+determine_haplotypes_per_bloc <- function(
                                              chromosome=character(0),
                                              start=integer(0),
                                              end=integer(0),
+                                             phased_dl,
                                              sample_iid=NULL,
                                              sample_bgen_iid_code=NULL,
                                              verbose=FALSE){
@@ -96,10 +112,10 @@ determine_haplotypes_per_bloc <- function(phased_data,
   samples_selected = sample_bgen_iid_code
   samples_rename = sample_iid
 
-  all_hap_1_2 = getDiploHaplo(phased_data, ranges=ranges,
+  all_hap_1_2 = getDiploHaplo(phased_dl, ranges=ranges,
                               samples_selected=samples_selected,
                               samples_rename=samples_rename)
-
+                              
   all_hapscodes = apply(all_hap_1_2, 1, function(x) {paste(unlist(x), collapse = '')})
 
   # factor
@@ -123,27 +139,55 @@ determine_haplotypes_per_bloc <- function(phased_data,
   return(my.effect.diplo)
 }
 
+#' Determine haplotypes per chromosome
 #'
-#' @import dummies
+#' @description Determine haplotypes per chromosome
+#'
+#' @param phased_dl A phased_data_loader returned by phased_data_loader.bgen() or phased_data_loader.haps().
+#' @param chromosome chromosome code
+#' @param start a list of integer specifying the starting position (bp) of the bloc.
+#' @param end a list of integer specifying the ending position (bp) of the bloc.
+#' @param sample_iid a list of participant ID. It correspond to the ID_2 in the .sample file
+#' @param sample_bgen_iid_code a list of index corresponding to the partcipant ID using .bgi/.bgen file. NOT CLEAR TOFIX. Please notice that, in the bgen format the participant IDs are anonymized.
+#' In order to get the correspondance, you need to look at the .sample file.
+#' this file can be used as correspondance table between the subject ID and the 'anonimized'ID using the index.
+#' Warning: the first row of the .sample file does'nt correspond to a participant ID and should be removed bedore the correspondance process.
+#' @param max_entries_per_sample An integer specifying the maximum number of probabilities expected per variant per sample.
+#' This is used to set the third dimension of the data matrix returned.
+#' @param nb_core number of cores one want to use. The number of core available in the machine -2 are used by default
+#' @param verbose silent warning messages. FALSE by default.
+#'
+#' @return Data frame structure representing the haplotypes determined for all blocs column binded
+#' @import parallel
 #' @export
 #'
-determine_haplotypes_per_chromosome <- function(chromosome, start, end, phased_data, sample_iid, sample_bgen_iid_code, max_entries_per_sample=4, nb_core=detectCores()-2, verbose=FALSE){
+determine_haplotypes_per_chromosome <- function(phased_dl,
+                                                chromosome,
+                                                start,
+                                                end,
+                                                sample_iid,
+                                                sample_bgen_iid_code,
+                                                nb_core=detectCores()-1,
+                                                verbose=FALSE){
 
   # silent warning messages
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   # apply on all blocs of one chromosome
-  haplotype_combined <- do.call(cbind, mcmapply(FUN = determine_haplotypes_per_bloc,
-                                                phased_data = phased_data,
-                                                chromosome = chromosome,
-                                                start = start,
-                                                end   = end,
-                                                sample_iid = list(sample_iid),
-                                                sample_bgen_iid_code = list(sample_bgen_iid_code),
-                                                mc.cores = nb_core))
+  haplotype_combined <- do.call(cbind, mcmapply(
+                                FUN = determine_haplotypes_per_bloc,
+                                chromosome = chromosome,
+                                start = start,
+                                end   = end,
+                                MoreArgs=list(
+                                    phased_dl=phased_dl,
+                                    sample_iid = filtered_sample_index_ID,
+                                    sample_bgen_iid_code = internal_samples[filtered_sample_index],
+                                    verbose=FALSE),
+                                USE.NAMES=TRUE,
+                                mc.cores = nb_core))
   return(haplotype_combined)
 }
-
 
 
 #' Determine haplotypes bloc
@@ -170,7 +214,7 @@ determine_haplotypes_per_chromosome <- function(chromosome, start, end, phased_d
 #' @import dummies
 #' @export
 #'
-legacy_determine_haplotypes_per_bloc = function(chromosome, start, end, bgen_file, sample_iid, sample_bgen_iid_code, max_entries_per_sample=4, verbose=FALSE){
+legacy_determine_haplotypes_per_bloc <- function(chromosome, start, end, bgen_file, sample_iid, sample_bgen_iid_code, max_entries_per_sample=4, verbose=FALSE){
 
   # silent warning messages
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
