@@ -46,7 +46,8 @@ library(gwhap)
 
 ###############################
 # now run an exmaple
-source("example/toy.R")
+toy_to_run = system.file("example", "toy.R",package="gwhap")
+source(toy_to_run)
 ```
 
 
