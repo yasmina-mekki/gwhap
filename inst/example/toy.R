@@ -1,12 +1,3 @@
-detach("package:gwhap", unload=TRUE)
-
-devtools::document(roclets=c('rd', 'collate', 'namespace'))
-devtools::build()
-
-install.packages("../gwhap_0.1.tar.gz", repos=NULL)
-library(gwhap)
-
-
 
 # toy bgen
 toy_bgen_fn <- system.file("extdata", "haplotypes.bgen",package="gwhap", mustWork=TRUE)
@@ -31,17 +22,3 @@ haplotypes.haps = determine_haplotypes_per_bloc(phased_dl.haps, chromosome="1", 
                                                    sample_iid=samples_selected,
                                                    sample_bgen_iid_code=samples_selected)
 haplotypes.haps
-
-
-bgen_fn = '/home/vf140245/volatile/GWHAP/data/ukb_hap_chr21_v2.bgen'
-blocs_dir = '/home/vf140245/volatile/GWHAP/data'
-# index path
-sample_file_path = '/home/vf140245/volatile/GWHAP/data/ukb25251_hap'
-# phenotype
-phenotype_path = '/home/vf140245/volatile/GWHAP/data/all_pheno_res.tsv'
-phenotype = read_delim(phenotype_path, delim='\t')
-# output
-output = '/neurospin/tmp/ymekki/new_repo/gwhap/T1_subjects/haplotypes'
-
-# get blocs
-df_blocs  = get_blocs(blocs_dir)

@@ -1,7 +1,12 @@
+#' Retrieve DiploHaplo matrix from a phased_data_loader instance
+#'
+#' @description This function retrieve DiploHaplo matrix from a phased_data_loader instance
+#'
 #' @export
 #'
 getDiploHaplo <- function(obj, ranges = NULL, samples_selected=NULL, samples_rename=samples_selected)
   UseMethod("getDiploHaplo", obj)
+
 
 #' @export
 #'
@@ -9,12 +14,20 @@ getDiploHaplo.default <- function(obj, ranges = NULL, samples_selected=NULL, sam
   stop("Area not defined on any object")
 }
 
+#' Retrieve DiploHaplo matrix from a phased_data_loader instance
+#'
+#' @description This function retrieve DiploHaplo matrix from a phased_data_loader instance (vcf implementation)
+#'
 #' @export
 #'
 getDiploHaplo.vcf <- function(obj, ranges = NULL, samples_selected=NULL, samples_rename=samples_selected) {
   stop("Area not defined on any object")
 }
 
+#' Retrieve DiploHaplo matrix from a phased_data_loader instance
+#'
+#' @description This function retrieve DiploHaplo matrix from a phased_data_loader instance (haps implementation)
+#'
 #'
 #' @import stringr
 #' @export
@@ -41,6 +54,10 @@ getDiploHaplo.haps <- function(obj, ranges = NULL, samples_selected=NULL, sample
   return(all_hap_1_2.haps)
 }
 
+#' Retrieve DiploHaplo matrix from a phased_data_loader instance
+#'
+#' @description This function retrieve DiploHaplo matrix from a phased_data_loader instance (bgen implementation)
+#'
 #' @export
 #'
 getDiploHaplo.bgen <- function(obj, ranges = NULL, samples_selected=NULL, samples_rename=samples_selected) {
@@ -84,10 +101,30 @@ getDiploHaplo.bgen <- function(obj, ranges = NULL, samples_selected=NULL, sample
   return(all_hap_1_2.bgen)
 }
 
+
+
 #' Determine haplotypes bloc
 #'
-#' @description This function is designed
+#' @description This function is designed for UKB haplotypes standard:
+#' one .bgen file, .bgen.bgi variant index file and .sample file containing the participant's ID.
 #'
+#' @param chromosome string, chromosome code of the desired bloc.
+#' @param start An integer specifying the starting position (bp) of the bloc.
+#' @param end An integer specifying the ending position (bp) of the bloc.
+#' @param phased_data_loader as obrained by phased_data_loader.bgen
+#' @param sample_iid participant ID. It correspond to the ID_2 in the .sample file. NOT CLEAR. TOFIX
+#' @param sample_bgen_iid_code a list of index corresponding to the partcipant ID using .bgi/.bgen file. Please notice that, in the bgen format the participant IDs are anonymized.
+#' In order to get the correspondance, you need to look at the .sample file.
+#' this file can be used as correspondance table between the subject ID and the 'anonimized'ID using the index.
+#' Warning: the first row of the .sample file does'nt correspond to a participant ID and should be removed bedore the correspondance process.
+#' @param max_entries_per_sample An integer specifying the maximum number of probabilities expected per variant per sample.
+#' This is used to set the third dimension of the data matrix returned.
+#' @param verbose silent warning messages. FALSE by default.
+#'
+#' @return haplotype count matrix for all haplotypes oserved in the bloc. The haplotypes name is coding as follow: chr_start_end_haps-code
+#'
+#' @import rbgen
+#' @import DBI
 #' @import dummies
 #' @export
 #'
@@ -147,7 +184,7 @@ determine_haplotypes_per_bloc <- function(
 #' @param chromosome chromosome code
 #' @param start a list of integer specifying the starting position (bp) of the bloc.
 #' @param end a list of integer specifying the ending position (bp) of the bloc.
-#' @param sample_iid a list of participant ID. It correspond to the ID_2 in the .sample file
+#' @param sample_iid a list of participant ID. It correspond to the ID_2 in the .sample file. NOT CLEAR TOFIX. 
 #' @param sample_bgen_iid_code a list of index corresponding to the partcipant ID using .bgi/.bgen file. NOT CLEAR TOFIX. Please notice that, in the bgen format the participant IDs are anonymized.
 #' In order to get the correspondance, you need to look at the .sample file.
 #' this file can be used as correspondance table between the subject ID and the 'anonimized'ID using the index.

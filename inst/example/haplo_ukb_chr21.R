@@ -1,12 +1,3 @@
-# To do during development for each cycle
-#########################################
-detach("package:gwhap", unload=TRUE)
-
-devtools::document(roclets=c('rd', 'collate', 'namespace'))
-devtools::build()
-
-install.packages("../gwhap_0.1.tar.gz", repos=NULL)
-library(gwhap)
 
 # Begin of the script
 #########################################
@@ -59,6 +50,7 @@ print(class(phased_dl))
 phased_dl[["annot_internalIID"]]= phased_dl[["annot_internalIID"]][1:3]
 phased_dl[["annot_variants"]]=phased_dl[["annot_variants"]][1:2,]
 
+# in this example consider blocs #10, #11, #12
 haplotype_combined = determine_haplotypes_per_chromosome(
                             phased_dl,
                             chromosome=chromosome,
@@ -66,12 +58,12 @@ haplotype_combined = determine_haplotypes_per_chromosome(
                             end[10:12],
                             sample_iid = filtered_sample_index_ID,
                             sample_bgen_iid_code = internal_samples[filtered_sample_index],
-                            nb_core=detectCores()-2,
+                            nb_core=detectCores()-1,
                             verbose=FALSE
                            )
 
 # save the haplotypes in tsv file (very heavy, you should consider to use an other way to save the haplotypes)
-#save_haplotypes(haplotype_combined, chromosome=chr, output=output)
+#save_haplotypes(haplotype_combined, chromosome=chr, output=output_dir)
 
 # save the haplotypes in RData object
-save(haplotype_combined, file=sprintf('%s/haplotypes_%s.RData', output, chromosome), compress=T)
+save(haplotype_combined, file=sprintf('%s/haplotypes_%s.RData', output_dir, chromosome), compress=T)
