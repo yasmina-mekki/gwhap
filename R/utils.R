@@ -102,6 +102,58 @@ get_bim_file <- function(file_path){
 }
 
 
+#' @export
+#'
+getAnnotVariants <- function(obj)
+  UseMethod("getAnnotVariants", obj)
+
+#' @export
+#'
+getAnnotVariants.default <- function(obj) {
+  stop("getAnnotVariants not defined on this object")
+}
+
+#' @export
+#'
+getAnnotVariants.vcf <- function(obj) {
+  stop("getAnnotVariants not defined on this object")
+}
+
+
+#' @export
+#'
+getAnnotVariants.bgen <- function(obj) {
+    return(obj[["annot_variants"]])
+}
+
+
+
+#' @export
+#'
+getInternalIID <- function(obj)
+  UseMethod("getInternalIID", obj)
+
+#' @export
+#'
+getInternalIID.default <- function(obj) {
+  stop("getInternalIID not defined on this object")
+}
+
+#' @export
+#'
+getInternalIID.vcf <- function(obj) {
+  stop("getInternalIID not defined on this object")
+}
+
+
+#' @export
+#'
+getInternalIID.bgen <- function(obj) {
+    return(obj[["annot_internalIID"]])
+}
+
+
+
 #' Get bgi file
 #'
 #' @description Get bgi file
@@ -193,8 +245,9 @@ get_augmented_genetic_map <- function(augmented_genetic_map_dir, chromosomes=1:2
 #'
 get_blocs <- function(blocs_dir, chromosomes=1:22){
   blocs_df = c()
-  for (chr in 1:22){
+  for (chr in chromosomes){
     blocs_chr = sprintf('%s/blocs_chr%s.txt', blocs_dir, chr)
+    print(blocs_chr)
     if(file.exists(blocs_chr)){blocs_df = rbind(blocs_df, read_delim(blocs_chr, delim='\t'))}
   }
   return(blocs_df)
@@ -381,17 +434,35 @@ phased_data_loader.bgen <- function(bgen_filename) {
   # check the existence of bgen.bgi file
   # TODO
 
-  # open and check that data are phased
-  ranges = data.frame(
-    chromosome = character(0),
-    start = integer(0),
-    end = integer(0)
-  )
-  data = bgen.load(bgen_filename, ranges)
-  print(str(data))
+  # get the annotation
+  full_fname_bgi=sprintf("%s.bgi", bgen_filename)
+  annot_variants = get_bgi_file(full_fname_bgi)
 
-  ret_obj = list(full_fname_bgen=bgen_filename, is_phased=TRUE,
-                 max_entries=4, full_fname_bgi=sprintf("%s.bgi", bgen_filename))
+  # open and check that data are phased
+  data = get_bgen_file(file_path = bgen_filename,
+                          start = annot_variants$position[1],
+                          end = annot_variants$position[1],
+                          samples = c(),
+                          chromosome = '',
+                          max_entries_per_sample = 4)
+  #  print(str(data))
+  annot_internalIID <-data$samples
+  
+  # In ukb chromosome names is not in the bgen/bgi :degenerated FLAG
+  chrom_name_degenerated = FALSE
+  if (unique(annot_variants$chromosome) == "") {
+      chrom_name_degenerated = TRUE
+  }
+      
+  ret_obj = list(full_fname_bgen=bgen_filename,
+                 is_phased=TRUE,
+                 max_entries=4,
+                 annot_internalIID=annot_internalIID,
+                 annot_variants=annot_variants,
+                 full_fname_bgi=full_fname_bgi,
+                 chrom_name_degenerated=chrom_name_degenerated)
+
+  # create S3 object
   class(ret_obj) <- c(class(ret_obj), "phased", "bgen")
 
   return(ret_obj)
