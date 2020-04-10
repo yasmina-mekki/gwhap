@@ -41,7 +41,7 @@ devtools::build_vignettes()
 devtools::build()
 
 
-install.packages("../gwhap_0.1.tar.gz", repos=NULL)
+install.packages("../gwhap_0.2.tar.gz", repos=NULL)
 library(gwhap)
 
 ###############################
