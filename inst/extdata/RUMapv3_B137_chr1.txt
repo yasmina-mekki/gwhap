@@ -1,0 +1,5 @@
+Marker_name  Build37_start_physical_position    Sex_averaged_start_map_position
+rs1 1 0.00
+rs4 4 0.0000004
+rs100 100 0.0001
+rs200 200 0.0101

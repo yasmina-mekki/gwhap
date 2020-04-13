@@ -1,0 +1,131 @@
+---
+title: "GWHAP PART1 - GENETIC MAPS INTERPOLATION"
+author: "SK"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GWHAP PART1 - GENETIC MAPS INTERPOLATION}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  error=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment = "#>"
+)
+```
+```{r}
+library(gwhap)
+library(data.table)
+library(readr)
+```
+# Genome-Wide HAPloptype analysis  
+## PART 1 : Genetic Map
+### GWHAP needs to depermine the location the genetic map (i.e in cM) of the phased markers. 
+
+For every marker postion in bp, GWHAP will try find it in a reference genetic map.
+If the marker's position is not in the genetic map, its position in cM is computed using linear interpolation. 
+GWHAP can use several reference maps format :  Rutgers genetic map v3 , 1000 Genomes ...
+See vignette "Ressources" for details
+TO DO : code that check the download URL for all downloaders
+
+### Reading the the reference genetic map :
+
+
+* GWHAP can read reference maps in Rutgers Maps filename and column format :
+```{r}
+genetic_map_file=system.file("extdata", "RUMapv3_B137_chr1.txt",package="gwhap", mustWork=TRUE)
+genetic_map=get_rutgers_map(genetic_map_file) # for chr. 1
+head(genetic_map)
+```
+
+
+NOT WORKING : GWHAP can read 1000 genomes maps:
+
+TODO : use original 1000 genomes map files
+
+* GWHAP can read  1000 genomes genetic maps file format
+```R
+genetic_map_file=system.file("extdata", "chr1_1000_Genome.txt",package="gwhap", mustWork=TRUE)
+genetic_map=get_1000_genome(genetic_map_file)
+head(genetic_map)
+```
+
+
+
+* GWHAP can read compressed (.gz) 1000 genomes maps using 3 columns [ rsid ; position ; cM]  :
+```{r}
+genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
+genetic_map=get_1000_genome_interpolated_map(genetic_map_file)
+head(genetic_map)
+```
+
+
+
+
+### Reading the list of SNPs to place on the map :
+
+* GWHAP can read a list of SNPs using the bgi/bgen file :
+```{r}
+snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
+snp_list=get_bgi_file(snp_file)
+head(snp_list)
+```
+
+* GWHAP can read a list of SNPs using any text file in .bim format  :
+```{r}
+snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
+snp_list=get_bim_file(snp_physical_positions)
+
+head(snp_list)
+```
+
+
+### GWHAP provide build-in function to interpolate a list of SNPs using a reference map :
+TODO fix buggy "interp_in" list : keep snps reference needed
+
+
+*  Interpolate maps for bim files format  and 1000 Genomes reference maps:
+```{r}
+genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
+genetic_map_dir=dirname(genetic_map_file)
+snp_physical_positions =snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
+interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
+
+
+head(interpolated_map)
+```
+
+
+TODO : Use an ybgen.bgi filenames format (use list?) and  1000 genomes maps
+
+* Using UKB Biobank filenames format (bgen.bgi) and  1000 genomes maps : 
+
+```{r}
+genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
+genetic_map_dir=dirname(genetic_map_file)
+snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
+snp_physical_positions=sprintf("%s/ukb_",dirname(snp_file))
+interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
+
+head(interpolated_map)
+```
+
+
+
+* Using UKB Biobank filenames format (bgen.bgi) and  Rutgers maps:
+
+```{r}
+genetic_map_file=system.file("extdata", "RUMapv3_B137_chr1.txt",package="gwhap", mustWork=TRUE)
+genetic_map_dir=dirname(genetic_map_file)
+snp_physical_positions="inst/extdata/ukb_"
+interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE)
+
+head(interpolated_map)
+```
+
+
