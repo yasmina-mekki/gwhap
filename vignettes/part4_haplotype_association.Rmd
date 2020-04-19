@@ -1,0 +1,71 @@
+---
+title: "GWHAP PART 4 : HAPLOTYPE ASSOCIATION TEST"
+author: "SK"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GWHAP PART 4 : HAPLOTYPE ASSOCIATION TEST}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  error=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment = "#>"
+)
+```
+```{r}
+library(gwhap)
+library(data.table)
+library(readr)
+```
+# Genome-Wide HAPloptype analysis  
+## PART 4 : Haplotype Association Test
+### GWHAP will compute association test for a phenotype and a given haplotype count matrix
+
+* Get Haplotype count matrix :
+
+```{r}
+toy_hap_fn <- system.file("extdata", "haplotypes_many_samples.haps" ,package="gwhap", mustWork=TRUE)
+phased_dl.haps = phased_data_loader.haps(toy_hap_fn)
+samples_selected = c("sample_0","sample_1","sample_2","sample_3","sample_4","sample_5","sample_6","sample_7")
+haplotypes.haps = determine_haplotypes_per_bloc(phased_dl.haps, chromosome="1", 
+                                                start=1, 
+                                                end=2,
+                                                sample_iid=samples_selected,
+                                                sample_bgen_iid_code=samples_selected)
+
+# colnames(haplotypes.bgen)=paste("hap", colnames(haplotypes.bgen), sep="_")
+haplotypes.haps
+```
+TODO : fix lm_test for Y matrix (several phenotypes)
+WARNING : For N subjects, needs strictly less  than N-1 haplotypes
+* Run test on random phenotype:
+```{r}
+
+X=data.frame(haplotypes.haps)
+Y=data.frame(pheno=rnorm(nrow(X)))
+lm_test_haplotypes(X=X, Y=Y,kind='all')
+```
+* loop to evaluate pvalue distribution and FPR :
+```{r}
+pv=c()
+n=5000
+for (i in 1:n) {
+X=data.frame(haplotypes.haps)
+Y=data.frame(pheno=rnorm(nrow(X)))
+lm=lm_test_haplotypes(X=X, Y=Y,kind='bloc')
+pv=c(pv,lm$bloc$p_value)
+}
+y=pv
+plot(-log10(1:n/(n+1)),-log10(sort(y)),col="red",pch='o',xlab = "-log10 expected",ylab = "-log10 observed")
+abline(a=0,b=1)
+mean(pv<0.25)
+mean(pv<0.1)
+mean(pv<0.05)
+
+```
