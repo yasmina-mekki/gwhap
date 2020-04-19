@@ -1,0 +1,116 @@
+---
+title: "GWHAP PART 3 - INDIVIDUAL HAPLOTYPES COUNT"
+author: "SK"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GWHAP PART 3 - INDIVIDUAL HAPLOTYPES COUNT}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  error=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment = "#>"
+)
+```
+```{r}
+library(gwhap)
+library(data.table)
+library(readr)
+```
+# Genome-Wide HAPloptype analysis  
+## PART 3 : Individual Haplotypes
+### GWHAP will determine individual haplotypes on a given block
+
+See vignette "Part2-Blocks" for computing haplotype blocks
+
+See vignette "Ressources" for phased data file formats 
+
+* GWHAP can read phased data in .bgen format 
+
+SNP alleles on individual chromosome are stored as 0/1.
+Haplotype blocks locations are given in the " ranges" argument 
+TODO : propose a link function from "blocks" dataframe to "ranges" argument
+
+```{r}
+toy_bgen_fn <- system.file("extdata", "haplotypes.bgen",package="gwhap", mustWork=TRUE)
+phased_dl.bgen = phased_data_loader.bgen(toy_bgen_fn)
+ranges = data.frame(chromosome = "1", 
+                    start = 1, 
+                    end = 3)
+getDiploHaplo(phased_dl.bgen,
+              ranges=ranges)
+```
+
+* GWHAP can select which individuals to read in bgen file using  (selected samples) argument :
+
+```{r}
+samples_selected = c("sample_1","sample_2","sample_3")
+getDiploHaplo(phased_dl.bgen,
+              samples_selected = samples_selected,
+              ranges=ranges)
+```
+ 
+## Haplotype Count Matrix
+* GWHAP will count the number haplotypes observed for each individuals :
+
+```{r}
+
+haplotypes.bgen = determine_haplotypes_per_bloc(phased_dl.bgen, chromosome="1", 
+                                                start=1, 
+                                                end=3,
+                                                sample_iid=samples_selected,
+                                                sample_bgen_iid_code=samples_selected)
+haplotypes.bgen
+
+```
+
+* Example with a loop to iterate over several blocks :
+```{r}
+blocks=data.frame(chr=c("1","1"),
+                  start_bp=c(1,3),
+                  end_bp=c(2,4))
+for (row in 1:nrow(blocks)) {
+  haplotypes.bgen = determine_haplotypes_per_bloc(phased_dl.bgen, 
+                                                  chromosome=blocks$chr[row], 
+                                                  start=blocks$start_bp[row],
+                                                  end=blocks$end_bp[row],
+                                                  sample_iid=samples_selected,
+                                                  sample_bgen_iid_code=samples_selected)
+  print(head(haplotypes.bgen))
+}
+
+```
+
+
+
+* GWHAP can read SHAPEIT .haps format :
+
+** TODO : start & end  arguments are not respected in determine_haplotype for shapeit format
+```{r}
+toy_hap_fn <- system.file("extdata", "haplotypes.haps" ,package="gwhap", mustWork=TRUE)
+phased_dl.haps = phased_data_loader.haps(toy_hap_fn)
+
+for (row in 1:nrow(blocks)) {
+  ranges = data.frame(chromosome = blocks$chr[row], 
+                    start = blocks$start_bp[row], 
+                    end = blocks$end_bp[row])
+print(getDiploHaplo(phased_dl.bgen,
+              ranges=ranges,
+              samples_selected = samples_selected))
+
+  haplotypes.bgen = determine_haplotypes_per_bloc(phased_dl.haps, 
+                                                  chromosome=blocks$chr[row], 
+                                                  start=blocks$start_bp[row],
+                                                  end=blocks$end_bp[row],
+                                                  sample_iid=samples_selected,
+                                                  sample_bgen_iid_code=samples_selected)
+  print(head(haplotypes.bgen))
+}
+
+```
