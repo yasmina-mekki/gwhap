@@ -1,0 +1,25 @@
+---
+title: "GWHAP - Visualization"
+author: "VF"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GWHAP - Various plots and graphs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  error=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment = "#>"
+)
+```
+```{r}
+library(gwhap)
+library(data.table)
+library(readr)
+```
