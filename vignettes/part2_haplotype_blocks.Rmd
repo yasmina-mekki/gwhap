@@ -1,0 +1,91 @@
+---
+title: "GWHAP PART 2 - HAPLOTYPES BLOCK"
+author: "SK"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GWHAP PART 2 - HAPLOTYPES BLOCK}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  error=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment = "#>"
+)
+```
+```{r}
+library(gwhap)
+library(data.table)
+library(readr)
+```
+# Genome-Wide HAPloptype analysis  
+## PART 2 : Haplotype blocks
+### GWHAP will determine haplotypes blocks where neigboring markers are less that \delta  apopart on the map (in cM)  
+
+See vignette "Part1-Maps" for computing genetic maps of markers
+
+### Haplotype blocks  are defined on  genetic maps :
+
+TODO unify output format from create_ and get_
+```{r}
+snp_physical_positions = system.file("extdata", "example_high_density.bim", package="gwhap", mustWork=TRUE)
+snp_list=get_bim_file(snp_physical_positions)
+genetic_map_dir=dirname(snp_physical_positions)
+genetic_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
+                                         genetic_map_dir=genetic_map_dir, 
+                                         map_name='1000_genome_interpolated', 
+                                         save_genetic_map=FALSE)
+create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
+                                         genetic_map_dir=genetic_map_dir, 
+                                         map_name='1000_genome_interpolated', 
+                                         save_genetic_map=TRUE,
+                                         output = tempdir())
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tempdir(),
+                                             chromosomes=1:23)
+head(genetic_map)
+
+head(augmented_map_df)
+
+```
+
+
+
+
+* Create blocs with a single delta
+
+TODO : error when no blocks were created on a given chromosome
+
+```{r}
+create_blocs(genetics_map=augmented_map_df, 
+             delta=1e-2,
+             save_blocs=TRUE,
+             output=tempdir())
+df_blocks=get_blocs(blocs_dir = tempdir(),
+          chromosomes = 1:23)
+head(df_blocks)
+```
+
+* Create blocs with multiple values of delta
+```{r}
+deltas = c(1e-3, 1e-2)
+dfs_blocks = c()
+for(delta in deltas){
+  df_blocks_tmp = create_blocs(genetics_map=augmented_map_df,
+                               delta=delta,
+                               save_blocs=FALSE)
+  dfs_blocks <- rbind(dfs_blocks, df_blocks_tmp)
+}
+df_blocs=do.call(rbind,dfs_blocks)
+head(df_blocs)
+```
+
+* GWHAP provides high-level function to produce images for block distribution
+
+see vignette "visualization"
+
+TODO : rebuild vignette visualization with toy examples
