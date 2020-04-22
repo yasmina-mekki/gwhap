@@ -54,6 +54,7 @@ or
 
 ```bash
 R -e "setwd(\"gwhap\");devtools::document(roclets=c('rd', 'collate', 'namespace'))"
+R CMD build --no-build-vignettes gwhap ; R CMD INSTALL gwhap_0.2.tar.gz
 ```
 
 
