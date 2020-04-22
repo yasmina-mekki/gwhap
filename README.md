@@ -50,6 +50,12 @@ toy_to_run = system.file("example", "toy.R",package="gwhap")
 source(toy_to_run)
 ```
 
+or 
+
+```bash
+R -e "setwd("gwhap");devtools::document(roclets=c('rd', 'collate', 'namespace'))"
+```
+
 
 ## Installation
 
