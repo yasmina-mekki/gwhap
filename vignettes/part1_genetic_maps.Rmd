@@ -38,9 +38,23 @@ TO DO : code that check the download URL for all downloaders
 
 * GWHAP can read reference maps in Rutgers Maps filename and column format :
 ```{r}
-genetic_map_file=system.file("extdata", "RUMapv3_B137_chr1.txt",package="gwhap", mustWork=TRUE)
-genetic_map=get_rutgers_map(genetic_map_file) # for chr. 1
-head(genetic_map)
+f1 = system.file("extdata", "RUMapv3_B137_chr1.txt",
+                          package="gwhap", mustWork=TRUE)
+chr=list(1)
+names(chr) = f1
+
+filepaths=c(f1)
+encodings = list("cM"="Sex_averaged_start_map_position",
+                 "position"="Build37_start_physical_position",
+                 "chr"=chr)
+
+# get an instance of Genetic_Map
+genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+
+# finally read the corresponding data and have a quick look at it
+genetic_map = readData(genetic_map)
+
+print(head(genetic_map@gmapData))
 ```
 
 
@@ -49,19 +63,54 @@ NOT WORKING : GWHAP can read 1000 genomes maps:
 TODO : use original 1000 genomes map files
 
 * GWHAP can read  1000 genomes genetic maps file format
-```R
-genetic_map_file=system.file("extdata", "chr1_1000_Genome.txt",package="gwhap", mustWork=TRUE)
-genetic_map=get_1000_genome(genetic_map_file)
-head(genetic_map)
+```{r}
+# give the list of files to consider
+f1 = system.file("extdata", "chr1_1000_Genome.txt",
+                          package="gwhap", mustWork=TRUE)
+# build a NAMED list mapping the chrom information
+chr = list(1)
+names(chr) = c(f1)
+
+filepaths = c(f1)
+encodings = list("cM"="Genetic_Map(cM)", "position"="position", "chr"=chr)
+
+# get an instance of Genetic_Map
+genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+
+# finally read the corresponding data and have a quick look at it
+genetic_map = readData(genetic_map)
+
+# finally read the corresponding data and have a quick look at it
+genetic_map = readData(genetic_map)
+
+print(head(genetic_map@gmapData))
 ```
 
 
 
 * GWHAP can read compressed (.gz) 1000 genomes maps using 3 columns [ rsid ; position ; cM]  :
 ```{r}
-genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
-genetic_map=get_1000_genome_interpolated_map(genetic_map_file)
-head(genetic_map)
+f1 = system.file("extdata", "chr1.interpolated_genetic_map.gz",
+                          package="gwhap", mustWork=TRUE)
+f2 = system.file("extdata", "chr2.interpolated_genetic_map.gz",
+                          package="gwhap", mustWork=TRUE)
+# build a NAMED list mapping the chrom information
+chr = list(1, 2)
+names(chr) = c(f1, f2)
+
+# now build the parameter for Genetic_Map object. Inspect the file to
+# assign the right column name for cM and position.
+# Here the chrom info is not read from the file it is read from the
+# NAMED list chr
+filepaths = c(f1, f2)
+encodings = list("cM"="cM", "position"="bp","chr"=chr)
+
+# get an instance of Genetic_Map
+genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+
+# finally read the corresponding data and have a quick look at it
+genetic_map = readData(genetic_map)
+print(head(genetic_map@gmapData))
 ```
 
 
@@ -91,13 +140,13 @@ TODO fix buggy "interp_in" list : keep snps reference needed
 
 *  Interpolate maps for bim files format  and 1000 Genomes reference maps:
 ```{r}
-genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
-genetic_map_dir=dirname(genetic_map_file)
-snp_physical_positions =snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
+#genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
+#genetic_map_dir=dirname(genetic_map_file)
+#snp_physical_positions =snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
+#interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
 
 
-head(interpolated_map)
+#head(interpolated_map)
 ```
 
 
@@ -106,13 +155,13 @@ TODO : Use an ybgen.bgi filenames format (use list?) and  1000 genomes maps
 * Using UKB Biobank filenames format (bgen.bgi) and  1000 genomes maps : 
 
 ```{r}
-genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
-genetic_map_dir=dirname(genetic_map_file)
-snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
-snp_physical_positions=sprintf("%s/ukb_",dirname(snp_file))
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
+#genetic_map_file=system.file("extdata", "chr1.interpolated_genetic_map.gz",package="gwhap", mustWork=TRUE)
+#genetic_map_dir=dirname(genetic_map_file)
+#snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
+#snp_physical_positions=sprintf("%s/ukb_",dirname(snp_file))
+#interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
 
-head(interpolated_map)
+#head(interpolated_map)
 ```
 
 
@@ -120,12 +169,12 @@ head(interpolated_map)
 * Using UKB Biobank filenames format (bgen.bgi) and  Rutgers maps:
 
 ```{r}
-genetic_map_file=system.file("extdata", "RUMapv3_B137_chr1.txt",package="gwhap", mustWork=TRUE)
-genetic_map_dir=dirname(genetic_map_file)
-snp_physical_positions="inst/extdata/ukb_"
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE)
+#genetic_map_file=system.file("extdata", "RUMapv3_B137_chr1.txt",package="gwhap", mustWork=TRUE)
+#genetic_map_dir=dirname(genetic_map_file)
+#snp_physical_positions="inst/extdata/ukb_"
+#interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map_dir=genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE)
 
-head(interpolated_map)
+#head(interpolated_map)
 ```
 
 
