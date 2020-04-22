@@ -53,7 +53,7 @@ source(toy_to_run)
 or 
 
 ```bash
-R -e "setwd("gwhap");devtools::document(roclets=c('rd', 'collate', 'namespace'))"
+R -e "setwd(\"gwhap\");devtools::document(roclets=c('rd', 'collate', 'namespace'))"
 ```
 
 
