@@ -4,6 +4,7 @@
 #'
 #' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
 #' @param genetic_map_dir i.e. rutgers map
+#' @param genetic_map the geentic map
 #' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved as a txt file. FALSE by default.
 #' @param map_name the genetic map name. Three maps name are available : rutgers, 1000_genome and 1000_genome_interpolated.
 #' 'rutgers' by default.
@@ -20,7 +21,7 @@
 #' @import tools
 #' @importFrom stats na.omit
 #' @export
-create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE, output='', verbose=FALSE){
+create_augmented_genetic_map <- function(snp_physical_positions, genetic_map=NULL, genetic_map_dir="", map_name='rutgers', save_genetic_map=FALSE, output='', verbose=FALSE){
 
   # silent warning messages
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
@@ -57,11 +58,16 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
   gen_map_augmented = list()
   for (chr in unique(snp_list$chromosome)){
 
+    if (!(is.null(genetic_map))) {
+        chr_map = genetic_map@gmapData[genetic_map@gmapData$chr==chr]
+    } else
+    {
     # read the genetic map
     if(map_name == 'rutgers'){chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))}
     if(map_name == '1000_genome_interpolated'){chr_map = get_1000_genome_interpolated_map(sprintf('%s/chr%s.interpolated_genetic_map.gz', genetic_map_dir, chr))}
     if(map_name == '1000_genome'){chr_map = get_1000_genome_map(sprintf('%s/genetic_map_chr%s_combined_b37.txt', genetic_map_dir, chr))}
-
+    }
+    
     # get interval of position defined by min-1 and max+1 neighbour variant in the genetic map
     interp_in = chr_map$position > (min(snp_list$bp[snp_list$chromosome == chr])-1) & chr_map$position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
 
@@ -83,6 +89,7 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
 
     # remove the NAs if present and store the augmented genetic map for each chromosome
     gen_map_augmented[[chr]]  = na.omit(gen_map_augmented_chr)
+
   }
 
   # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
@@ -98,54 +105,54 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map_dir
 }
 
 
-#' Use and interpolate genetic map of a chromosome
-#'
-#' @param genetic_map  reference genetic map of a chromosome [BP,cM]
-#' @param snp_list SNP position list to interpolate [BP]
-#'
-#' @return gen_map_chr_interp : genetic map for the SNP list : [BP,cM]
-#' @export
-genetic_map_interp_chr <- function(genetic_map, snp_list){
+##' Use and interpolate genetic map of a chromosome
+##'
+##' @param genetic_map  reference genetic map of a chromosome [BP,cM]
+##' @param snp_list SNP position list to interpolate [BP]
+##'
+##' @return gen_map_chr_interp : genetic map for the SNP list : [BP,cM]
+##' @export
+#genetic_map_interp_chr <- function(genetic_map, snp_list){
 
-    # builiding the interpolation model using all reference positions in chromosome chr
-    gen_map_approx.fun <- stats::approxfun(genetic_map[,1],
-                                           genetic_map[,2],
-                                           ties="ordered")
-    # snps to interpolate in the chromosome chr
-    snp_interp = gen_map_approx.fun(snp_list)
+#    # builiding the interpolation model using all reference positions in chromosome chr
+#    gen_map_approx.fun <- stats::approxfun(genetic_map[,1],
+#                                           genetic_map[,2],
+#                                           ties="ordered")
+#    # snps to interpolate in the chromosome chr
+#    snp_interp = gen_map_approx.fun(snp_list)
 
-    # update the genetic map
-    gen_map_chr_interp = data.frame(pos=snp_list,
-                                cM=snp_interp)
-
-
-  return(gen_map_chr_interp)
-}
+#    # update the genetic map
+#    gen_map_chr_interp = data.frame(pos=snp_list,
+#                                cM=snp_interp)
 
 
-#' Use and interpolate of all chromosomes using a reference map  object
-#'
-#' @param genetic_map_all  reference genetic map of all chromosomes [chr,BP,cM]
-#' @param snp_list SNP position list to interpolate in all chromosomes [chr,BP]
-#'
-#' @return gen_map_allchr_interp : genetic map for the SNP list : [chr,BP,cM]
-#' @export
-genetic_map_interp <- function(genetic_map_all, snp_list){
-  gen_map_allchr_interp=c()
-  #loop over all chr in the snp list
-  for (chr in unique(snp_list[,1])){
-    map_in=genetic_map_all[,1]==chr
-    genetic_map=genetic_map_all[map_in,c(2,3)]
-    snps_in=snp_list[,1]==chr
-    snps_to_interp= snp_list[snps_in,2]
+#  return(gen_map_chr_interp)
+#}
 
-    # adding interpolation for chomosome chr to resulting map gen_map_allchr_interp
-    gen_map_allchr_interp=rbind(gen_map_allchr_interp,
-                                data.frame(chr=chr,
-                                           genetic_map_interp_chr(genetic_map = genetic_map,
-                                                                  snp_list = snps_to_interp)))
 
-  }
-  return(gen_map_allchr_interp)
+##' Use and interpolate of all chromosomes using a reference map  object
+##'
+##' @param genetic_map_all  reference genetic map of all chromosomes [chr,BP,cM]
+##' @param snp_list SNP position list to interpolate in all chromosomes [chr,BP]
+##'
+##' @return gen_map_allchr_interp : genetic map for the SNP list : [chr,BP,cM]
+##' @export
+#genetic_map_interp <- function(genetic_map_all, snp_list){
+#  gen_map_allchr_interp=c()
+#  #loop over all chr in the snp list
+#  for (chr in unique(snp_list[,1])){
+#    map_in=genetic_map_all[,1]==chr
+#    genetic_map=genetic_map_all[map_in,c(2,3)]
+#    snps_in=snp_list[,1]==chr
+#    snps_to_interp= snp_list[snps_in,2]
 
-}
+#    # adding interpolation for chomosome chr to resulting map gen_map_allchr_interp
+#    gen_map_allchr_interp=rbind(gen_map_allchr_interp,
+#                                data.frame(chr=chr,
+#                                           genetic_map_interp_chr(genetic_map = genetic_map,
+#                                                                  snp_list = snps_to_interp)))
+
+#  }
+#  return(gen_map_allchr_interp)
+
+#}

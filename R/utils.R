@@ -4,6 +4,44 @@
 # merge get_augmented_genetic_map and get_blocs functions
 #__________________________________________________________________________________________________
 
+.onLoad <- function(libname, pkgname) {
+    gwhapConfig = list()
+    
+    # toy interpolated 1000 genomes
+    f1 = system.file("extdata", "chr1.interpolated_genetic_map.gz", package="gwhap", mustWork=TRUE)
+    f2 = system.file("extdata", "chr2.interpolated_genetic_map.gz", package="gwhap", mustWork=TRUE)
+    chr = list(1, 2)
+    names(chr) = c(f1, f2)
+    filepaths = c(f1, f2)
+    encodings = list("cM"="cM", "position"="bp","chr"=chr) 
+    gwhapConfig[["genmap_toy_interpolated_1000"]] = list(filepaths=filepaths, encodings=encodings)
+
+    # toy reference 1000 genomes
+    f1 = system.file("extdata", "chr1_1000_Genome.txt",package="gwhap", mustWork=TRUE)
+    chr = list(1)
+    names(chr) = c(f1)
+    filepaths = c(f1)
+    encodings = list("cM"="Genetic_Map(cM)", "position"="position", "chr"=chr)
+    gwhapConfig[["genmap_toy_reference_1000"]] = list(filepaths=filepaths, encodings=encodings)
+
+    # toy rutger
+    f1 = system.file("extdata", "RUMapv3_B137_chr1.txt", package="gwhap", mustWork=TRUE)
+    chr=list(1)
+    names(chr) = f1
+    filepaths=c(f1)
+    encodings = list("cM"="Sex_averaged_start_map_position",
+                     "position"="Build37_start_physical_position",
+                     "chr"=chr)
+    gwhapConfig[["genmap_toy_rutger"]] = list(filepaths=filepaths, encodings=encodings)
+    
+    assign("gwhapConfig", gwhapConfig, envir = parent.env(environment()))
+}
+
+# access this global varaible with
+# gwhap:::gwhapConfig
+
+
+
 #' Read the genetic map
 #'
 #' @description Read the genetic map

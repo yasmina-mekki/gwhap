@@ -33,24 +33,34 @@ See vignette "Part1-Maps" for computing genetic maps of markers
 
 TODO unify output format from create_ and get_
 ```{r}
-#snp_physical_positions = system.file("extdata", "example_high_density.bim", package="gwhap", mustWork=TRUE)
-#snp_list=get_bim_file(snp_physical_positions)
-#genetic_map_dir=dirname(snp_physical_positions)
-#genetic_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
-#                                         genetic_map_dir=genetic_map_dir, 
-#                                         map_name='1000_genome_interpolated', 
-#                                         save_genetic_map=FALSE)
-#create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
-#                                         genetic_map_dir=genetic_map_dir, 
-#                                         map_name='1000_genome_interpolated', 
-#                                         save_genetic_map=TRUE,
-#                                         output = tempdir())
-#augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tempdir(),
-#                                             chromosomes=1:23)
-#head(genetic_map)
-#
-#head(augmented_map_df)
+snp_physical_positions = system.file("extdata", "example_high_density.bim", package="gwhap", mustWork=TRUE)
+snp_list=get_bim_file(snp_physical_positions)
+genetic_map_dir=dirname(snp_physical_positions)
 
+filepaths = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$filepaths
+encodings = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$encodings
+
+# get an instance of Genetic_Map and readData
+interp1000_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+interp1000_genetic_map = readData(interp1000_genetic_map)
+
+
+genetic_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
+                                        genetic_map=interp1000_genetic_map,
+                                         genetic_map_dir=genetic_map_dir, 
+                                         map_name='1000_genome_interpolated', 
+                                         save_genetic_map=FALSE)
+tmpDir = tempdir()
+create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, 
+                                          genetic_map=interp1000_genetic_map,
+                                         genetic_map_dir=genetic_map_dir, 
+                                         map_name='1000_genome_interpolated', 
+                                         save_genetic_map=TRUE,
+                                         output = tmpDir)
+augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tmpDir,
+                                             chromosomes=1:23)
+head(genetic_map)
+head(augmented_map_df)
 ```
 
 

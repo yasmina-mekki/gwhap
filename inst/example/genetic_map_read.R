@@ -23,6 +23,10 @@ names(chr) = c(f1, f2)
 filepaths = c(f1, f2)
 encodings = list("cM"="cM", "position"="bp","chr"=chr)
 
+# obtain them directly from the helper variable
+filepaths = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$filepaths
+encodings = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$encodings
+
 # get an instance of Genetic_Map
 genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 print(genetic_map)
