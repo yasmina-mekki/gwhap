@@ -2,14 +2,14 @@
 #'
 #' @description  Create an augmented genetic map
 #'
-#' @param snp_physical_positions the snp physical position map. Either a bim or bgi file
+#' @param snp_bucket A Snp_Bucket object containing the snp physical
+#' positions to interpolate from the reference map. Either a bim or bgi file
 #' @param genetic_map_dir i.e. rutgers map
-#' @param genetic_map the geentic map
+#' @param genetic_map A Genetic_Map object containing the reference 
+#' on which the interpolation is based genetic map
 #' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved as a txt file. FALSE by default.
-#' @param map_name the genetic map name. Three maps name are available : rutgers, 1000_genome and 1000_genome_interpolated.
-#' 'rutgers' by default.
 #' @param output A dir path where the augmented genetic map will be saved.
-#' @param verbose silent warning messages. FALSE by default.
+#' @param verbose A Boolean for warning messages. FALSE by default.
 #'
 #' @return if save_genetic_map == TRUE, then the augmented genetic map is saved.
 #' The format of the output would be one txt file per chromosome.
@@ -21,87 +21,57 @@
 #' @import tools
 #' @importFrom stats na.omit
 #' @export
-create_augmented_genetic_map <- function(snp_physical_positions, genetic_map=NULL, genetic_map_dir="", map_name='rutgers', save_genetic_map=FALSE, output='', verbose=FALSE){
+create_augmented_genetic_map <- function(snp_bucket, 
+                                    genetic_map=NULL,
+                                    save_genetic_map=FALSE, 
+                                    output='', verbose=FALSE){
 
-  # silent warning messages
-  if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
+    # silent warning messages
+    if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
-  # read the snp physical positions
+    # create the augmented genetic map
+    gen_map_augmented = list()
 
-  # read the one bim file for the whole autosome
-  if('bim' == file_ext(snp_physical_positions)){snp_list = get_bim_file(snp_physical_positions)}
-
-  # one bgi file per chromosome. read each one of them and concatenate them into one dataframe
-  else{
-    snp_list = c()
-    for (chr in 1:23){
-      bgi_file_path = sprintf('%schr%s_v2.bgen.bgi', snp_physical_positions, chr)
-      # check if file path exist
-      if(file.exists(bgi_file_path)){
-
-        # get bgi file
-        tmp = get_bgi_file(bgi_file_path)
-
-        # add chromosome code
-        tmp$chromosome = chr
-
-        # change column name for correspondance with bim file
-        colnames(tmp) <- c('chromosome', 'bp', 'snp', 'number_of_alleles', 'allele1', 'allele2', 'file_start_position', 'size_in_bytes')
-
-        # concatenation
-        snp_list  = rbind(snp_list, tmp)
-      }
-    }
-  }
-
-  # create the augmented genetic map
-  gen_map_augmented = list()
-  for (chr in unique(snp_list$chromosome)){
-
-    if (!(is.null(genetic_map))) {
-        chr_map = genetic_map@gmapData[[sprintf('chr',chr)]]
-    } else
-    {
-    # read the genetic map
-    if(map_name == 'rutgers'){chr_map = get_rutgers_map(sprintf('%s/RUMapv3_B137_chr%s.txt', genetic_map_dir, chr))}
-    if(map_name == '1000_genome_interpolated'){chr_map = get_1000_genome_interpolated_map(sprintf('%s/chr%s.interpolated_genetic_map.gz', genetic_map_dir, chr))}
-    if(map_name == '1000_genome'){chr_map = get_1000_genome_map(sprintf('%s/genetic_map_chr%s_combined_b37.txt', genetic_map_dir, chr))}
-    }
+    short_list_chr = intersect(unique(names(snp_bucket@bucketData)), unique(names(genetic_map@gmapData)))
+    for (chr in short_list_chr) {
+        # get the NAMED list (chr <-> data.frame
+        chr_map = genetic_map@gmapData[[chr]]
+        chr_snp_list = snp_bucket@bucketData[[chr]]
     
-    # get interval of position defined by min-1 and max+1 neighbour variant in the genetic map
-    interp_in = chr_map$position > (min(snp_list$bp[snp_list$chromosome == chr])-1) & chr_map$position < (max(snp_list$bp[snp_list$chromosome == chr]+1))
+        # get interval of position defined by min-1 and max+1 neighbour variant in the genetic map
+        interp_in = (chr_map$position > (min(chr_snp_list$position)-1)) & (chr_map$position < (max(chr_snp_list$position)+1))
 
-    # perform the linear interpolation
-    gen_map_approx.fun <- stats::approxfun(chr_map$position[interp_in],
-                                           chr_map$cM[interp_in],
-                                           ties="ordered")
+        # initialize the linear interpolator
+        gen_map_approx.fun <- stats::approxfun(chr_map$position[interp_in],
+                                               chr_map$cM[interp_in],
+                                               ties="ordered")
+        # filter on the position, rsid and snp interpolation for the current chromosome
+        snp_interp = gen_map_approx.fun(chr_snp_list$position)
+        position   = chr_snp_list$position
+        rsid       = chr_snp_list$snp
 
-    # filter on the position, rsid and snp interpolation for the current chromosome
-    snp_interp = gen_map_approx.fun(snp_list$bp[snp_list$chromosome == chr])
-    position   = snp_list$bp[snp_list$chromosome == chr]
-    rsid       = snp_list$snp[snp_list$chromosome == chr]
+        # check if NA values are present
+        gen_map_augmented_chr = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
+        if (nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ]) != 0){
+          warning(sprintf('Number of NA in chromosome %s : %s. Progress towards removing ...', chr, nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ])))
+        }
 
-    # check if NA values are present
-    gen_map_augmented_chr = data.frame(cM=snp_interp, pos=position, rsid=rsid, chr=chr)
-    if (nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ]) != 0){
-      warning(sprintf('Number of NA in chromosome %s : %s. Progress towards removing ...', chr, nrow(gen_map_augmented_chr[is.na(gen_map_augmented_chr), ])))
+        # remove the NAs if present and store the augmented genetic map for each chromosome
+        gen_map_augmented[[chr]]  = na.omit(gen_map_augmented_chr)
+        
     }
 
-    # remove the NAs if present and store the augmented genetic map for each chromosome
-    gen_map_augmented[[chr]]  = na.omit(gen_map_augmented_chr)
-
-  }
-
-  # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
-  if (save_genetic_map) {
-    for (chr in unique(snp_list$chromosome)){
-      file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
-      write_genetic_map(gen_map_augmented[[chr]], file_path)
+    # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
+    if (save_genetic_map) {
+        for (chr in short_list_chr){
+          file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
+          write_genetic_map(gen_map_augmented[[chr]], file_path)
+        }
+        # do not return anything if output not assigned
+        return(invisible())
     }
-    return(0)
-  }
-  # if save_genetic_map equal to FALSE, return the augmented genetic map as a list of dataframe
-  return(gen_map_augmented)
+    # if save_genetic_map equal to FALSE, return the augmented genetic map as a list of dataframe
+    return(gen_map_augmented)
 }
 
 
