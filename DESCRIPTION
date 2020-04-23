@@ -24,7 +24,6 @@ Imports:
     data.table,
     readr,
     stats,
-    ggplot2,
     dplyr,
     magrittr,
     datasets,
