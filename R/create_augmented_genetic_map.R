@@ -59,7 +59,7 @@ create_augmented_genetic_map <- function(snp_physical_positions, genetic_map=NUL
   for (chr in unique(snp_list$chromosome)){
 
     if (!(is.null(genetic_map))) {
-        chr_map = genetic_map@gmapData[genetic_map@gmapData$chr==chr]
+        chr_map = genetic_map@gmapData[[sprintf('chr',chr)]]
     } else
     {
     # read the genetic map

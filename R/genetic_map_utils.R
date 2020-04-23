@@ -13,7 +13,9 @@
 #' @rdname Genetic_Map
 #' @slot filepaths A filepath character vector
 #' @slot encodings A Named list c('cM', 'position', 'chr')
-#' @slot gmapData A data.frame for the read genetic map data
+#' @slot gmapData A list of data.frame to containe the genetic map data.
+#' This is a named list with key like 'chr1', 'chr2', 'chrX'. Each 
+#' data.frame has two columns : 'cM' and 'position'
 #' @export Genetic_Map
 Genetic_Map <- setClass(
     # Set the name for the class
@@ -23,14 +25,14 @@ Genetic_Map <- setClass(
     slots = c(
             filepaths = "character",
             encodings = "list",
-            gmapData = "data.frame"
+            gmapData = "list"
             ),
 
     # Set the default values for the slots. (optional)
     prototype=list(
             filepaths = c(),
             encodings   = list("chr"=NULL, "cM"=NULL, "position"=NULL),
-            gmapData = data.frame()
+            gmapData = list(data.frame())
             ),
 
     # Make a function that can test to see if the data is consistent.
@@ -61,6 +63,12 @@ Genetic_Map <- setClass(
                 return("The encodings@chr should contain only numeric as chromosome reference")
             }
         }
+        if (!is.list(object@gmapData)) {
+            return("The gmapData should be a list of data.frame")
+        }
+        if (!is.data.frame(object@gmapData[[1]])) {
+            return("The gmapData should be a list of data.frame")
+        }
         return(TRUE)
     }
 )
@@ -68,7 +76,7 @@ Genetic_Map <- setClass(
 # create a method to read the Genetic_Map map
 # first define hidden ancillary functions
 .read_gmap_no_internal_chrom_info <- function(object) {
-    outdf = data.frame()
+    outdf_list = list()
     for (key in names(object@encodings$chr)) {
         # key in this map (filename <-> #chr)
         chr_num = object@encodings$chr[[key]]
@@ -78,13 +86,11 @@ Genetic_Map <- setClass(
         col_toextract = sapply(col_tokeep, function(s) object@encodings[[s]])
         df = df[, ..col_toextract]
         colnames(df) = col_tokeep
-        # set the chr number
-        df[, 'chr'] = chr_num
-        # collate w/ existing
-        outdf = rbind(outdf, df)
+        # append the dataframe in the existing list w/ named chrom
+        outdf_list[[sprintf('chr',chr_num)]] = df
     }
 
-    return(outdf)
+    return(outdf_list)
 }
 
 
