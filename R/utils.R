@@ -33,7 +33,20 @@
                      "position"="Build37_start_physical_position",
                      "chr"=chr)
     gwhapConfig[["genmap_toy_rutger"]] = list(filepaths=filepaths, encodings=encodings)
-    
+
+    # toy flat(bim/plink) file to contain SNP physical position
+    filepaths = c(system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE))
+    encodings = list('snp'=2, 'position'=3, 'chr'=1)
+    gwhapConfig[["snpbucket_toy_flat"]] = list(filepaths=filepaths, encodings=encodings)
+ 
+     # toy bgen file to contain SNP physical position
+    f1 = system.file("extdata", "ukb_chr1_v2.bgen.bgi", package="gwhap", mustWork=TRUE)
+    filepaths = c(f1)
+    chr = list(1)
+    names(chr) = c(f1)
+    encodings = list('snp'='snp', 'position'='position', 'chr'=chr)
+    gwhapConfig[["snpbucket_toy_bgen"]] = list(filepaths=filepaths, encodings=encodings)
+  
     assign("gwhapConfig", gwhapConfig, envir = parent.env(environment()))
 }
 

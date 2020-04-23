@@ -85,7 +85,6 @@ print(head(genetic_map@gmapData))
 filepaths = gwhap:::gwhapConfig$genmap_toy_rutger$filepaths
 encodings = gwhap:::gwhapConfig$genmap_toy_rutger$encodings
 
-
 # get an instance of Genetic_Map
 genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 
@@ -111,84 +110,109 @@ genetic_map = readData(genetic_map)
 print(head(genetic_map@gmapData))
 ```
 
-
-
-
 ### Reading the list of SNPs to place on the map :
 
 * GWHAP can read a list of SNPs using the bgi/bgen file :
 ```{r}
-snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
-snp_list=get_bgi_file(snp_file)
-head(snp_list)
+# filepaths and encoding are build like for the Genetic_Map object
+f1 = system.file("extdata", "haplotypes.bgen.bgi",package="gwhap", mustWork=TRUE)
+chr = list(1)
+names(chr) = c(f1)
+filepaths = c(f1)
+encodings = list("snp"="snp", "position"="position","chr"=chr)
+
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
+print(snp_bucket@bucketData)
+
 ```
 
 * GWHAP can read a list of SNPs using any text file in .bim format  :
 ```{r}
-snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
-snp_list=get_bim_file(snp_physical_positions)
+# get the snp list position filename
+filepaths = gwhap:::gwhapConfig$snpbucket_toy_flat$filepaths
+encodings = gwhap:::gwhapConfig$snpbucket_toy_flat$encodings
+# inspect the parameters
+print(filepaths)
+print(encodings)
 
-head(snp_list)
+#
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
+
+#
+head(snp_bucket@bucketData)
 ```
 
 
 ### GWHAP provide build-in function to interpolate a list of SNPs using a reference map :
-TODO fix buggy "interp_in" list : keep snps reference needed
-
 
 *  Augmented maps for a list of SNP read from a bim files format and 1000 Genomes interpolated maps:
 ```{r}
+# get an instance of Genetic_Map
 filepaths = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$filepaths
 encodings = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$encodings
-
-
-# get an instance of Genetic_Map
 interp1000_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 interp1000_genetic_map = readData(interp1000_genetic_map)
 
 # get the snp list position filename
-snp_physical_positions = system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE)
+filepaths = gwhap:::gwhapConfig$snpbucket_toy_flat$filepaths
+encodings = gwhap:::gwhapConfig$snpbucket_toy_flat$encodings
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
 
 # get the augmented genetic_map
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map=interp1000_genetic_map, genetic_map_dir=genetic_map_dir, map_name='1000_genome_interpolated', save_genetic_map=FALSE)
-head(interpolated_map)
+interpolated_map=create_augmented_genetic_map(
+                            snp_bucket=snp_bucket,
+                            genetic_map=interp1000_genetic_map)
+print(head(interpolated_map))
 ```
-
-
-TODO : Use an ybgen.bgi filenames format (use list?) and  1000 genomes maps
 
 * Using UKB Biobank filenames format (bgen.bgi) and  1000 genomes maps : 
 
 ```{r}
+# read 1000 genome reference genetic map
 filepaths = gwhap:::gwhapConfig$genmap_toy_reference_1000$filepaths
 encodings = gwhap:::gwhapConfig$genmap_toy_reference_1000$encodings
-
 ref1000_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 ref1000_genetic_map = readData(ref1000_genetic_map)
 
+# read a Snp_bucket for some physical position
+filepaths = gwhap:::gwhapConfig$snpbucket_toy_flat$filepaths
+encodings = gwhap:::gwhapConfig$snpbucket_toy_flat$encodings
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
 
-snp_file=system.file("extdata","haplotypes.bgen.bgi", package="gwhap", mustWork=TRUE)
-snp_physical_positions=sprintf("%s/ukb_",dirname(snp_file))
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map=ref1000_genetic_map, genetic_map_dir=genetic_map_dir, map_name='1000_genome', save_genetic_map=FALSE)
 
-head(interpolated_map)
+interpolated_map=create_augmented_genetic_map(
+                            snp_bucket=snp_bucket,
+                            genetic_map=ref1000_genetic_map)
+
+print(head(interpolated_map))
 ```
-
-
 
 * Using UKB Biobank filenames format (bgen.bgi) and  Rutgers maps:
 
 ```{r}
+# read rutger ref genetic map
 filepaths = gwhap:::gwhapConfig$genmap_toy_rutger$filepaths
 encodings = gwhap:::gwhapConfig$genmap_toy_rutger$encodings
-
 rutger_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 rutger_genetic_map = readData(rutger_genetic_map)
 
-snp_physical_positions="inst/extdata/ukb_"
-interpolated_map=create_augmented_genetic_map(snp_physical_positions=snp_physical_positions, genetic_map=rutger_genetic_map, genetic_map_dir=genetic_map_dir, map_name='rutgers', save_genetic_map=FALSE)
+#snp_physical_positions
+filepaths = gwhap:::gwhapConfig$snpbucket_toy_bgen$filepaths
+encodings = gwhap:::gwhapConfig$snpbucket_toy_bgen$encodings
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
 
-head(interpolated_map)
+
+interpolated_map=create_augmented_genetic_map(
+                        snp_bucket=snp_bucket,
+                        genetic_map=rutger_genetic_map,
+                        save_genetic_map=FALSE)
+
+print(head(interpolated_map))
 ```
 
 

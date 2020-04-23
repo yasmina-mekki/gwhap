@@ -82,12 +82,12 @@ Genetic_Map <- setClass(
         chr_num = object@encodings$chr[[key]]
         df = fread(key)
         # get the sepecified column and fix names - robust code to keep
-        col_tokeep = names(encodings)[names(encodings) %in% c('cM', 'position')]
+        col_tokeep = names(object@encodings)[names(object@encodings) %in% c('cM', 'position')]
         col_toextract = sapply(col_tokeep, function(s) object@encodings[[s]])
         df = df[, ..col_toextract]
         colnames(df) = col_tokeep
         # append the dataframe in the existing list w/ named chrom
-        outdf_list[[sprintf('chr',chr_num)]] = df
+        outdf_list[[sprintf('chr%d',chr_num)]] = df
     }
 
     return(outdf_list)
@@ -109,7 +109,7 @@ setGeneric(name="readData",
 
 #' @rdname readData
 #' @return data for map based on mutiple chromfiles
-#' @aliases getData
+#' @aliases readData
 #' @examples
 #' TOBEFIXED
 setMethod(f="readData",
@@ -122,7 +122,7 @@ setMethod(f="readData",
         }
         else {
         # chr information is in the files
-            object@gmapData = data.frame()
+            object@gmapData = list(data.frame())
         }
         return(object)
     }
