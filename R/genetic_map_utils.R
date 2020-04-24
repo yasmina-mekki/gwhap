@@ -52,8 +52,8 @@ Genetic_Map <- setClass(
             return("The encodings list should contain chr, cM, position and format keys")
         }
         # specific encodings@format validity checks
-        if (!(object@encodings[["format"]] %in% c("", "table", "bgen"))) {
-            return("The encodings$format should be table or bgen")
+        if (!(object@encodings[["format"]] %in% c("", "table", "bgen", "rds"))) {
+            return("The encodings$format should be table, rds or bgen")
         }
         # specific encodings@chr validity checks
         if (!(is.list(object@encodings[["chr"]]) | is.character(object@encodings[["chr"]]))) {
@@ -97,6 +97,15 @@ Genetic_Map <- setClass(
     return(outdf_list)
 }
 
+.read_gmap_rds <- function(object) {
+    # only one filepath is expected in object@filepaths
+    # the rds file read is expected to contain one instance of a 
+    # instance of Genetic_Map
+    # 
+    outdf_list = readRDS(object@filepaths)@gmapData
+
+    return( outdf_list )
+}
 
 # now define the exposet object Genetic_Map methods
 #' readData perform the actual reading of the genetic maps data based on the encodings
@@ -121,14 +130,49 @@ setMethod(f="readData",
     definition=function(object)
     {
         if (is.list(object@encodings[["chr"]])) {
-        # chr information not in the files
+        # chr information NOT IN the files
             object@gmapData = .read_gmap_no_internal_chrom_info(object)
         }
         else {
-        # chr information is in the files
-            object@gmapData = list(data.frame())
+        # chr information IN the files
+            if (object@encodings[["format"]]=="rds") {
+                # object@filepaths should be a 1 length vector TODO test
+                object@gmapData = .read_gmap_rds(object)
+            } else {
+                object@gmapData = list(data.frame())
+            }
         }
         return(object)
     }
 )
 
+# now define the exposet object Genetic_Map methods
+#' saveData perform the actual reading of the genetic maps data based on the encodings
+#' @name saveData
+#' 
+#' @aliases saveData
+#' @export
+setGeneric(name="saveData",
+    def=function(object, file)
+    {
+       standardGeneric("saveData")
+    }
+)
+
+#' @rdname saveData
+#' @return save a genetic map in RDS format
+#' @aliases saveData
+#' @examples
+#' TOBEFIXED
+setMethod(f="saveData",
+    signature="Genetic_Map",
+    definition=function(object, file)
+    {
+        # not necessary but coherent
+        object@encodings$format="rds"
+        # now save this instance of Genetic_Map
+        saveRDS(object, file=file)
+
+        return(invisible(object))
+    }
+)

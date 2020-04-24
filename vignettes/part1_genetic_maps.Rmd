@@ -107,7 +107,7 @@ genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
 
 # finally read the corresponding data and have a quick look at it
 genetic_map = readData(genetic_map)
-print(head(genetic_map@gmapData))
+head(genetic_map@gmapData)
 ```
 
 ### Reading the list of SNPs to place on the map :
@@ -165,7 +165,7 @@ snp_bucket = readData(snp_bucket)
 interpolated_map=create_augmented_genetic_map(
                             snp_bucket=snp_bucket,
                             genetic_map=interp1000_genetic_map)
-print(head(interpolated_map))
+head(interpolated_map@gmapData)
 ```
 
 * Using UKB Biobank filenames format (bgen.bgi) and  1000 genomes maps : 
@@ -188,7 +188,7 @@ interpolated_map=create_augmented_genetic_map(
                             snp_bucket=snp_bucket,
                             genetic_map=ref1000_genetic_map)
 
-print(head(interpolated_map))
+head(interpolated_map@gmapData)
 ```
 
 * Using UKB Biobank filenames format (bgen.bgi) and  Rutgers maps:
@@ -212,7 +212,7 @@ interpolated_map=create_augmented_genetic_map(
                         genetic_map=rutger_genetic_map,
                         save_genetic_map=FALSE)
 
-print(head(interpolated_map))
+head(interpolated_map@gmapData)
 ```
 
 

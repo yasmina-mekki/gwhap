@@ -51,20 +51,26 @@ genetic_map=create_augmented_genetic_map(
                                 genetic_map=interp1000_genetic_map,
                                 save_genetic_map=FALSE)
                                 
-#save the interpolated map in tmpDir
-tmpDir = tempdir()
+# save the interpolated map in tmpFilepath
+# the Genetic_Map instance will be saved in a single rds R format 
+tmpFilepath = tempfile(tmpdir = tempdir(), fileext = ".rds")
 create_augmented_genetic_map(
                                 snp_bucket=snp_bucket,
                                 genetic_map=interp1000_genetic_map,
                                 save_genetic_map=TRUE,
-                                output = tmpDir)
-# re read it
+                                outputfile = tmpFilepath)
+# Re read it
+# Specify filepaths and encodings.
+filepaths = tmpFilepath
+encodings = list("chr"="", "position"="", "cM"="", "format"="rds")
+saved_augmented_map_df = Genetic_Map(filepaths=filepaths, encodings=encodings)
+saved_augmented_map_df = readData(saved_augmented_map_df)
 # This function to fix use readData instead TODO
-augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tmpDir,
-                                             chromosomes=1:23)
+#augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tmpDir,
+#                                             chromosomes=1:23)
 # Compare the maps before and after save.
-head(genetic_map)
-head(augmented_map_df)
+head(genetic_map@gmapData)
+head(saved_augmented_map_df@gmapData)
 ```
 
 * Create blocs with a single delta
