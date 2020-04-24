@@ -8,10 +8,10 @@
 #' @param genetic_map A Genetic_Map object containing the reference 
 #' on which the interpolation is based genetic map
 #' @param save_genetic_map Boolean. specify if the augmented genetic map should be saved as a txt file. FALSE by default.
-#' @param output A dir path where the augmented genetic map will be saved.
+#' @param outputfile A file path where the augmented genetic map will be saved as Genetic_Maps instance in rds.
 #' @param verbose A Boolean for warning messages. FALSE by default.
 #'
-#' @return if save_genetic_map == TRUE, then the augmented genetic map is saved.
+#' @return if save_genetic_map == TRUE, the augmented genetic map as Genetic_Maps instance in rds
 #' The format of the output would be one txt file per chromosome.
 #' Each txt file would have the following information:
 #' each line represent a SNP. The columns represent the centimorgan information, snp's position, its rs id and chromosome code.
@@ -24,13 +24,13 @@
 create_augmented_genetic_map <- function(snp_bucket, 
                                     genetic_map=NULL,
                                     save_genetic_map=FALSE, 
-                                    output='', verbose=FALSE){
+                                    outputfile='', verbose=FALSE){
 
     # silent warning messages
     if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
     # create the augmented genetic map
-    gen_map_augmented = list()
+    gen_map_augmented_data = list()
 
     short_list_chr = intersect(unique(names(snp_bucket@bucketData)), unique(names(genetic_map@gmapData)))
     for (chr in short_list_chr) {
@@ -57,20 +57,22 @@ create_augmented_genetic_map <- function(snp_bucket,
         }
 
         # remove the NAs if present and store the augmented genetic map for each chromosome
-        gen_map_augmented[[chr]]  = na.omit(gen_map_augmented_chr)
+        gen_map_augmented_data[[chr]]  = na.omit(gen_map_augmented_chr)
         
     }
+    
+    # Embed the gen_map_augmented_data in an S4 instance of Genetic_Data
+    gen_map_augmented = Genetic_Map(
+                filepaths="",
+                encodings=list("chr"="", "cM"="", "position"="", "format"=""),
+                gmapData=gen_map_augmented_data)
 
     # if save_genetic_map equal to TRUE, write the augmented genetic map on txt files
     if (save_genetic_map) {
-        for (chr in short_list_chr){
-          file_path = sprintf('%s/augmented_map_chr%s.txt', output, chr)
-          write_genetic_map(gen_map_augmented[[chr]], file_path)
-        }
-        # do not return anything if output not assigned
+        saveData(gen_map_augmented, file=outputfile)
         return(invisible())
     }
-    # if save_genetic_map equal to FALSE, return the augmented genetic map as a list of dataframe
+    # if save_genetic_map is FALSE, return the augmented genetic map as a Genetic_Map instance
     return(gen_map_augmented)
 }
 

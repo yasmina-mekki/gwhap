@@ -52,9 +52,13 @@ Snp_Bucket <- setClass(
         if(!is.list(object@encodings)) {
             return("The encodings should be a list")
         }
-        if(!all(names(object@encodings) %in% c("chr", "snp", "position"))) {
+        if(!all(names(object@encodings) %in% c("chr", "snp", "position", "format"))) {
             print(names(object@encodings))
-            return("The encodings list should contain chr, snp and position keys")
+            return("The encodings list should contain chr, snp, position and format keys")
+        }
+        # specific encodings@format validity checks
+        if (!(object@encodings[["format"]] %in% c("", "table", "bgen"))) {
+            return("The encodings$format should be table or bgen")
         }
         # specific encodings@chr validity checks
         if (!(is.list(object@encodings[["chr"]]) | is.character(object@encodings[["chr"]]) | is.numeric(object@encodings[["chr"]]))) {

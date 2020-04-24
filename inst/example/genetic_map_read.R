@@ -100,3 +100,48 @@ print(genetic_map)
 genetic_map = readData(genetic_map)
 print(genetic_map)
 print(dim(genetic_map@gmapData))
+
+
+########################################################################
+# Test the save/reread function on a Genetic_Map
+# example here of saving / rereading an augmented map
+#
+
+# get an instance of Genetic_Map and readData  interpolted 1000 genome
+filepaths = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$filepaths
+encodings = gwhap:::gwhapConfig$genmap_toy_interpolated_1000$encodings
+interp1000_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+interp1000_genetic_map = readData(interp1000_genetic_map)
+
+# get snp physical position to interpolate from the reference map
+filepaths = gwhap:::gwhapConfig$snpbucket_toy_flat$filepaths
+encodings = gwhap:::gwhapConfig$snpbucket_toy_flat$encodings
+snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
+snp_bucket = readData(snp_bucket)
+
+# interpolate
+augmented_genetic_map=create_augmented_genetic_map(
+                                snp_bucket=snp_bucket,
+                                genetic_map=interp1000_genetic_map,
+                                save_genetic_map=FALSE)
+                                
+# save the interpolated map in tmpFilepath
+# the Genetic_Map instance will be saved in a single rds R format 
+tmpFilepath = tempfile(tmpdir = tempdir(), fileext = ".rds")
+create_augmented_genetic_map(
+                                snp_bucket=snp_bucket,
+                                genetic_map=interp1000_genetic_map,
+                                save_genetic_map=TRUE,
+                                outputfile = tmpFilepath)
+# Re read it
+# Specify filepaths and encodings.
+filepaths = tmpFilepath
+encodings = list("chr"="", "position"="", "cM"="", "format"="rds")
+saved_augmented_genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
+saved_augmented_genetic_map = readData(saved_augmented_genetic_map)
+# This function to fix use readData instead TODO
+#augmented_map_df = get_augmented_genetic_map(augmented_genetic_map_dir= tmpDir,
+#                                             chromosomes=1:23)
+# Compare the maps before and after save.
+head(augmented_genetic_map@gmapData)
+head(saved_augmented_genetic_map@gmapData)

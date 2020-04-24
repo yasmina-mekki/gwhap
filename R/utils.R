@@ -13,7 +13,7 @@
     chr = list(1, 2)
     names(chr) = c(f1, f2)
     filepaths = c(f1, f2)
-    encodings = list("cM"="cM", "position"="bp","chr"=chr) 
+    encodings = list("cM"="cM", "position"="bp","chr"=chr, "format"="table") 
     gwhapConfig[["genmap_toy_interpolated_1000"]] = list(filepaths=filepaths, encodings=encodings)
 
     # toy reference 1000 genomes
@@ -21,7 +21,7 @@
     chr = list(1)
     names(chr) = c(f1)
     filepaths = c(f1)
-    encodings = list("cM"="Genetic_Map(cM)", "position"="position", "chr"=chr)
+    encodings = list("cM"="Genetic_Map(cM)", "position"="position", "chr"=chr, "format"="table")
     gwhapConfig[["genmap_toy_reference_1000"]] = list(filepaths=filepaths, encodings=encodings)
 
     # toy rutger
@@ -31,12 +31,13 @@
     filepaths=c(f1)
     encodings = list("cM"="Sex_averaged_start_map_position",
                      "position"="Build37_start_physical_position",
-                     "chr"=chr)
+                     "chr"=chr,
+                     "format"="bgen")
     gwhapConfig[["genmap_toy_rutger"]] = list(filepaths=filepaths, encodings=encodings)
 
     # toy flat(bim/plink) file to contain SNP physical position
     filepaths = c(system.file("extdata", "example.bim", package="gwhap", mustWork=TRUE))
-    encodings = list('snp'=2, 'position'=3, 'chr'=1)
+    encodings = list('snp'=2, 'position'=3, 'chr'=1, "format"="table")
     gwhapConfig[["snpbucket_toy_flat"]] = list(filepaths=filepaths, encodings=encodings)
  
      # toy bgen file to contain SNP physical position
@@ -44,7 +45,7 @@
     filepaths = c(f1)
     chr = list(1)
     names(chr) = c(f1)
-    encodings = list('snp'='snp', 'position'='position', 'chr'=chr)
+    encodings = list('snp'='snp', 'position'='position', 'chr'=chr, "format"="bgen")
     gwhapConfig[["snpbucket_toy_bgen"]] = list(filepaths=filepaths, encodings=encodings)
   
     assign("gwhapConfig", gwhapConfig, envir = parent.env(environment()))
@@ -200,26 +201,6 @@ get_bgen_file <- function(file_path, start, end, samples=samples, chromosome='',
 #'
 write_genetic_map <- function(dataframe, output){
   write.table(dataframe, output, sep="\t", row.names=FALSE, quote=FALSE)
-}
-
-
-#' Get augmented genetic map
-#'
-#' @description Get augmented genetic map
-#'
-#' @param augmented_genetic_map_dir A path to the augmeneted genetic map dir
-#' @param chromosomes A list of chromosomes that one want to read
-#'
-#' @return the augmented genetic map into a data table structure
-#' @export
-#'
-get_augmented_genetic_map <- function(augmented_genetic_map_dir, chromosomes=1:22){
-  augmented_genetic_map_df = c()
-  for (chr in 1:22){
-    augmented_chr = sprintf('%s/augmented_map_chr%s.txt', augmented_genetic_map_dir, chr)
-    if(file.exists(augmented_chr)){augmented_genetic_map_df = rbind(augmented_genetic_map_df, read_delim(augmented_chr, delim='\t'))}
-  }
-  return(augmented_genetic_map_df)
 }
 
 
