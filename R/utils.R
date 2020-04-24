@@ -204,26 +204,6 @@ write_genetic_map <- function(dataframe, output){
 }
 
 
-#' Get augmented genetic map
-#'
-#' @description Get augmented genetic map
-#'
-#' @param augmented_genetic_map_dir A path to the augmeneted genetic map dir
-#' @param chromosomes A list of chromosomes that one want to read
-#'
-#' @return the augmented genetic map into a data table structure
-#' @export
-#'
-get_augmented_genetic_map <- function(augmented_genetic_map_dir, chromosomes=1:22){
-  augmented_genetic_map_df = c()
-  for (chr in 1:22){
-    augmented_chr = sprintf('%s/augmented_map_chr%s.txt', augmented_genetic_map_dir, chr)
-    if(file.exists(augmented_chr)){augmented_genetic_map_df = rbind(augmented_genetic_map_df, read_delim(augmented_chr, delim='\t'))}
-  }
-  return(augmented_genetic_map_df)
-}
-
-
 #' Get blocs
 #'
 #' @description Get blocs
