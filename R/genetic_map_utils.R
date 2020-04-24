@@ -31,7 +31,7 @@ Genetic_Map <- setClass(
     # Set the default values for the slots. (optional)
     prototype=list(
             filepaths = c(),
-            encodings   = list("chr"=NULL, "cM"=NULL, "position"=NULL),
+            encodings   = list("chr"=NULL, "cM"=NULL, "position"=NULL, "format"=NULL),
             gmapData = list(data.frame())
             ),
 
@@ -47,20 +47,24 @@ Genetic_Map <- setClass(
         if(!is.list(object@encodings)) {
             return("The encodings should be a list")
         }
-        if(!all(names(object@encodings) %in% c("chr", "cM", "position"))) {
+        if(!all(names(object@encodings) %in% c("chr", "cM", "position", "format"))) {
             print(names(object@encodings))
-            return("The encodings list should contain chr, cM and position keys")
+            return("The encodings list should contain chr, cM, position and format keys")
+        }
+        # specific encodings@format validity checks
+        if (!(object@encodings[["format"]] %in% c("", "table", "bgen"))) {
+            return("The encodings$format should be table or bgen")
         }
         # specific encodings@chr validity checks
         if (!(is.list(object@encodings[["chr"]]) | is.character(object@encodings[["chr"]]))) {
-            return("The encodings@chr should be list or a charcacter")
+            return("The encodings$chr should be list or a charcacter")
         }
         if (is.list(object@encodings[["chr"]])) {
             if (!all(names(object@encodings[["chr"]]) %in% filepaths)) {
-                return("The encodings@chr list does not match wirh filepaths vector")
+                return("The encodings$chr list does not match wirh filepaths vector")
             }
             if (!all(sapply(encodings[["chr"]], function(i) is.numeric(i)))) {
-                return("The encodings@chr should contain only numeric as chromosome reference")
+                return("The encodings$chr should contain only numeric as chromosome reference")
             }
         }
         if (!is.list(object@gmapData)) {

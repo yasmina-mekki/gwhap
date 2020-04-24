@@ -52,7 +52,7 @@ names(chr) = c(f1, f2)
 # Here the chrom info is not read from the file it is read from the
 # NAMED list chr
 filepaths = c(f1, f2)
-encodings = list("cM"="cM", "position"="bp","chr"=chr)
+encodings = list("cM"="cM", "position"="bp","chr"=chr, "format"="table")
 
 # get an instance of Genetic_Map
 genetic_map = Genetic_Map(filepaths=filepaths, encodings=encodings)
@@ -119,7 +119,7 @@ f1 = system.file("extdata", "haplotypes.bgen.bgi",package="gwhap", mustWork=TRUE
 chr = list(1)
 names(chr) = c(f1)
 filepaths = c(f1)
-encodings = list("snp"="snp", "position"="position","chr"=chr)
+encodings = list("snp"="snp", "position"="position","chr"=chr, "format"="bgen")
 
 snp_bucket = Snp_Bucket(filepaths=filepaths, encodings=encodings)
 snp_bucket = readData(snp_bucket)
