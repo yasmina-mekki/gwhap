@@ -69,3 +69,18 @@ mean(pv<0.1)
 mean(pv<0.05)
 
 ```
+
+* adding covariate and several phenotypes :
+```{r}
+X0=data.frame(Age=round(rnorm(nrow(X),mean = 65)),
+              Sex=round(runif(nrow(X))))
+
+Y=data.frame(pheno1=rnorm(nrow(X)), 
+             pheno2=rnorm(nrow(X),sd = 3) )
+
+lm_cov_test_haplotypes(X=X,
+                       X0=X0,
+                       Y=Y,
+                       kind="single")
+
+```

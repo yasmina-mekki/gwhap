@@ -114,8 +114,7 @@ lm_cov_test_haplotypes = function(X, Y, X0= null, kind='all', verbose=FALSE){
     
     fupdate_L= sprintf(". ~ . + %s", col_orgX)
     
-    aov_L=setNames(Map(anova,cov_Lm,full_Lm),col_orgY)
-  
+    
     pv_Var = setNames(lapply(cov_Lm, 
                              function(x) setNames(lapply(
       fupdate_L,function(y) 
