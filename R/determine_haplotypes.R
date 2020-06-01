@@ -129,13 +129,13 @@ getDiploHaplo.bgen <- function(obj, ranges = NULL, samples_selected=NULL, sample
 #' @export
 #'
 determine_haplotypes_per_bloc <- function(
-                                             chromosome=character(0),
-                                             start=integer(0),
-                                             end=integer(0),
-                                             phased_dl,
-                                             sample_iid=NULL,
-                                             sample_bgen_iid_code=NULL,
-                                             verbose=FALSE){
+                                     chromosome=character(0),
+                                     start=integer(0),
+                                     end=integer(0),
+                                     phased_dl,
+                                     sample_iid=NULL,
+                                     sample_bgen_iid_code=NULL,
+                                     verbose=FALSE){
 
   # silent warning messages
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
@@ -164,6 +164,9 @@ determine_haplotypes_per_bloc <- function(
   library(dummies)
   df = dummy.data.frame(data.frame(levels(rlefact)[as.numeric(hapfact)]))
   my.effect.diplo = df[1:length(samples_selected), ] + df[(length(samples_selected) +1):(2 * length(samples_selected)), ]
+  if (dim(my.effect.diplo)[2]==0) { # happens when all subjects homozyg for this haplo
+      return(NULL)
+  }
   colNames = colnames(my.effect.diplo)
   haps = unlist(lapply(strsplit(colNames,'_'), function(x) x[length(x)]))
 
@@ -171,6 +174,11 @@ determine_haplotypes_per_bloc <- function(
   haps = vapply(strsplit(haps,"hapfact.."), `[`, 2, FUN.VALUE=character(1))
 
   colnames(my.effect.diplo) = apply(merge(ranges, haps), 1, paste, collapse='_')
+  # Fix colnames no type control on chr name but output must be correct
+  # chr??_XXX_YYYY_!!!   with symbol to code for
+  colnames(my.effect.diplo) = paste("chr", 
+            colnames(my.effect.diplo)[!startsWith(colnames(my.effect.diplo), "chr")], sep="")
+
   row.names(my.effect.diplo) = samples_rename
 
   return(my.effect.diplo)
@@ -211,18 +219,23 @@ determine_haplotypes_per_chromosome <- function(phased_dl,
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
   # apply on all blocs of one chromosome
-  haplotype_combined <- do.call(cbind, mcmapply(
-                                FUN = determine_haplotypes_per_bloc,
-                                chromosome = chromosome,
-                                start = start,
-                                end   = end,
-                                MoreArgs=list(
-                                    phased_dl=phased_dl,
-                                    sample_iid = filtered_sample_index_ID,
-                                    sample_bgen_iid_code = internal_samples[filtered_sample_index],
-                                    verbose=FALSE),
-                                USE.NAMES=TRUE,
-                                mc.cores = nb_core))
+  haplotype_combined <- mcmapply(
+                            FUN = determine_haplotypes_per_bloc,
+                            chromosome = chromosome,
+                            start = start,
+                            end   = end,
+                            MoreArgs=list(
+                                phased_dl=phased_dl,
+                                sample_iid = sample_iid,
+                                sample_bgen_iid_code = sample_bgen_iid_code,
+                                verbose=FALSE),
+                            USE.NAMES=TRUE,
+                            mc.cores = nb_core)
+
+  # purge NULL items in the list
+  haplotype_combined <- do.call(cbind,
+               haplotype_combined[!sapply(haplotype_combined, is.null)])
+
   return(haplotype_combined)
 }
 

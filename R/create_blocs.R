@@ -2,7 +2,7 @@
 #'
 #' @description Create blocs
 #'
-#' @param genetics_map genetic map phasee
+#' @param genetics_map genetic map S4 objects with a slot gmapData
 #' @param delta delta
 #' @param save_blocs Boolean. specify if the created blocs should be saved. FALSE by default.
 #' @param output A path to a file where the created blocs will be saved.
@@ -20,13 +20,19 @@ create_blocs <- function(genetics_map, delta=1e-3, save_blocs=FALSE, output='', 
   # silent warning messages
   if(verbose == TRUE){options(warn=0)} else{options(warn=-1)}
 
+  if (class(interpolated_map) != "Genetic_Map") {  
+      return("The first parameter is not a Genetic_Map S4 object")
+  }
+
+  genetics_mapData = genetics_map@gmapData
   bloc_df = list()
 
-  for (chr in unique(genetics_map$chr)){
+#  for (chr in unique(genetics_mapData$chr)){
+  for (chr in names(genetics_mapData)) {
 
-    idx_chr  = genetics_map$chr == chr
-    start_cm = genetics_map$cM[idx_chr]
-    position = genetics_map$pos[idx_chr]
+    idx_chr  = genetics_mapData[[chr]]$chr == chr
+    start_cm = genetics_mapData[[chr]]$cM[idx_chr]
+    position = genetics_mapData[[chr]]$pos[idx_chr]
     ft       = position[c(1, length(position))]
     from_bp  = ft[1];
     to_bp    = ft[2];
@@ -51,7 +57,8 @@ create_blocs <- function(genetics_map, delta=1e-3, save_blocs=FALSE, output='', 
   }
 
   if (save_blocs) {
-    for (chr in unique(genetics_map$chr)){
+#    for (chr in unique(genetics_mapData[[chr]]$chr)){
+    for (chr in names(genetics_mapData)) {
       file_path = sprintf('%s/blocs_chr%s.txt', output, chr)
       write_blocs(bloc_df[[chr]], file_path)
     }
