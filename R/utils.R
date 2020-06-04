@@ -268,6 +268,25 @@ save_haplotypes <- function(haplotype_combined, chromosome, output){
   save(haplotype_combined, file=sprintf('%s/haplotypes_%s.RData', output, chromosome), compress=T)
 }
 
+#' Save tests
+#'
+#' @description Save haplotypes tests per chromosome. Each rows represent the subject with their IID as index.
+#' Each column ...
+#' @param haplotype_combined haplotype dataframe. The rows correspond to the subject while the column correspond to the haplotypes name
+#' @param chromosome chromosome code
+#' @param output A dir path where the haplotypes are saved
+#'
+#' @return None
+#' @import utils
+#' @export
+#'
+save_tests <- function(test, chromosome, output){
+   write.table(test, 
+              file=file.path(
+                   output,
+                   sprintf('blocks_tests_results_chr%d.tsv', chromosome)),
+             sep="\t", quote=F, row.names=F)
+}
 
 #' Summary haplotypes test
 #'

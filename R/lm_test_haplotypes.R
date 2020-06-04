@@ -1,7 +1,7 @@
 #' Test haplotypes
 #'
 #' @description Perform three tests using R-base lm:
-#' haplotype bloc model test
+#' haplotype block model test
 #' complete model haplotype test
 #' variant (single) haplotype model test
 #' the common haplotype is removed for the two first test
@@ -11,15 +11,15 @@
 #'
 #' @param X haplotype counts matrix
 #' @param Y phenotype or residues matrix
-#' @param kind which test to perform. Four values are possible: single, complete, bloc or all
+#' @param kind which test to perform. Four values are possible: single, complete, block or all
 #' @param verbose silent warning messages. FALSE by default.
 #'
 #' @return A list of the results of the three test. Each test results is represented by a data frame structure
-#' The data frame of the bloc test contains the following information:
-#' One bloc per line with the start and the end of the bloc position, p_value, number of subjects and the number of haplotypes of the bloc
-#' The data frame of the bloc complete and variant test contains the following information:
-#' One haplotype per line with start and the end of the bloc position,
-#' the haplotype code, p_value, number of subjects and the number of haplotypes of the bloc
+#' The data frame of the block test contains the following information:
+#' One block per line with the start and the end of the block position, p_value, number of subjects and the number of haplotypes of the block
+#' The data frame of the block complete and variant test contains the following information:
+#' One haplotype per line with start and the end of the block position,
+#' the haplotype code, p_value, number of subjects and the number of haplotypes of the block
 #' @importFrom stats lm
 #' @export
 #'
@@ -56,16 +56,16 @@ lm_test_haplotypes = function(X, Y, kind='all', verbose=FALSE){
 
   final_results = list()
 
-  if(kind == 'bloc' | kind == 'all'){
+  if(kind == 'block' | kind == 'all'){
 
     # perform the test
-    bloc_test_results = bloc_test(sum_Lm)
+    block_test_results = block_test(sum_Lm)
 
     # set the results into the right format
-    results  = data.frame(strsplit(varL[1], '_')[[1]][2], strsplit(varL[1], '_')[[1]][3], bloc_test_results[[1]], nrow(Y), length(varL))
+    results  = data.frame(strsplit(varL[1], '_')[[1]][2], strsplit(varL[1], '_')[[1]][3], block_test_results[[1]], nrow(Y), length(varL))
     names(results) <- c('start', 'end', 'p_value','nb_subjects', 'nb_haplotypes')
 
-    final_results[['bloc']] = results
+    final_results[['block']] = results
   }
 
   if(kind == 'complete' | kind == 'all'){
@@ -95,23 +95,23 @@ lm_test_haplotypes = function(X, Y, kind='all', verbose=FALSE){
   return(final_results)
 }
 
-#' Haplotype bloc model test
-#' @description Association between a given bloc and a phenotype
+#' Haplotype block model test
+#' @description Association between a given block and a phenotype
 #' the common haplotype is removed for this test
 #' warning : this function should not be used explicitly
-#' users must only call the lm_test_haplotypes function and specify bloc as kind parameters value
+#' users must only call the lm_test_haplotypes function and specify block as kind parameters value
 #' @param sum_Lm summary of a linear model estimated using lm_test_haplotypes function
 #'
 #' @return Significance of the association
 #' @export
 #'
-bloc_test <- function(sum_Lm){
+block_test <- function(sum_Lm){
   return(unlist(lapply(sum_Lm, function(y) {x = y$fstatistic
                                             pf(x[1], x[2], x[3], lower.tail = FALSE)})))
 }
 
 #' Complete model haplotype test
-#' @description Association between each haplotype of a given bloc and a phenotype
+#' @description Association between each haplotype of a given block and a phenotype
 #' the common haplotype is removed for this test
 #' warning : this function should not be used explicitly
 #' users must only call the lm_test_haplotypes function and specify complete as kind parameters value
@@ -126,7 +126,7 @@ complete_test <- function(sum_Lm){
 }
 
 #' Variant (single) haplotype model test
-#' @description Association between a given bloc and a phenotype.
+#' @description Association between a given block and a phenotype.
 #' The common haplotype is keeped for this test
 #' @param X haplotype counts matrix
 #' @param Y phenotype or residues matrix
