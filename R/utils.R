@@ -255,17 +255,30 @@ write_blocs <- function(dataframe, output){
 #'
 save_haplotypes <- function(haplotype_combined, chromosome, output){
 
-  # set the output path
-  haplotype_combined_path = sprintf('%s/haplotypes_%s.tsv', output, chromosome)
+  # set the output path  TOFIX
+  #haplotype_combined_path = sprintf('%s/haplotypes_%s.tsv', output, chromosome)
 
   # remove NA in the column name added by cbind
-  colnames(haplotype_combined) = vapply(strsplit(colnames(haplotype_combined),"[.]"), `[`, 2, FUN.VALUE=character(1))
+  #colnames(haplotype_combined) = vapply(strsplit(colnames(haplotype_combined),"[.]"), `[`, 2, FUN.VALUE=character(1))
 
   # save the haplotype as tsv file
   #write.table(haplotype_combined, haplotype_combined_path, sep="\t", row.names=TRUE, quote=FALSE)
 
   # save the haplotypes as .RData
-  save(haplotype_combined, file=sprintf('%s/haplotypes_%s.RData', output, chromosome), compress=T)
+  saveRDS(haplotype_combined, file=sprintf('%s/haplotypes_%s.RDS', output, chromosome), compress=T)
+}
+
+#' Load haplotypes
+#'
+#' @description Load haplotypes per chromosome.See save_haplotypes
+#' @param output A dir path where the haplotypes are saved
+#'
+#' @return haplotype_combined haplotype dataframe
+#' @import utils
+#' @export
+#'
+load_haplotypes <- function(chromosome, dirpath){
+    return(readRDS(sprintf('%s/haplotypes_%s.RDS', dirpath, chromosome)))
 }
 
 #' Save tests
@@ -284,7 +297,7 @@ save_tests <- function(test, chromosome, output){
    write.table(test, 
               file=file.path(
                    output,
-                   sprintf('blocks_tests_results_chr%d.tsv', chromosome)),
+                   sprintf('tests_results_chr%d.tsv', chromosome)),
              sep="\t", quote=F, row.names=F)
 }
 
