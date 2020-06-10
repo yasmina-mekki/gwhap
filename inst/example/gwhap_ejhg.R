@@ -104,11 +104,11 @@ phenotype_fpath <- args$args
 burnin     <- opt$burnin
 testsonly  <- opt$testsonly
 phenotypeall <- opt$phenotypeall
-if (all(sapply(opt$kind,  function(kk) kk %in% c('single', 'complete', 'block')))) {
-    kind <-opt$kind
+if (all(sapply(unlist(strsplit(opt$kind, split=',')),  function(kk) kk %in% c('single', 'complete', 'block')))) {
+    kind <-unlist(strsplit(opt$kind, split=','))
 } else
 {
-    print('Kind should be in c(single, complete, complete)')
+    print('Kind should be in c(single, complete, block)')
     exit(1)
 }
 
