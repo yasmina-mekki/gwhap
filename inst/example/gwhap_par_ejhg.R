@@ -16,6 +16,7 @@ library(parallel)
 library(optparse)
 library(readr)
 library(data.table)
+source("lm_paral_test_haplotypes.R")
 
 ########################################################################
 ##  root pathes
@@ -78,7 +79,7 @@ option_list <- list(
               help="Chromosome number [default %default]"),
   make_option(c("-p", "--phenotype"),
               type="character", default="FCLa_right",
-              help="Phenotype name [default %default]"),
+              help="Phenotype name (comma separeted list)[default %default]"),
   make_option(c("-k", "--kind"),
               type="character", default="block",
               help="Kind of test to consider (comma separeted list c('single','block','complete'))[default %default]"),
@@ -91,7 +92,6 @@ parser <- OptionParser(usage="%prog [options] file", option_list=option_list)
 args <- parse_args(parser, positional_arguments = 1)
 opt <- args$options # opt accessible like opt$outputdir
                     # args$args will be sued as pheno full path
-
 
 chromosome <- opt$chromosome
 save       <- opt$save
@@ -121,20 +121,19 @@ if (all(sapply(unlist(strsplit(opt$kind, split=',')),  function(kk) kk %in% c('s
 #~ phenotype_fpath = file.path(data_root, '/reports-internal/Haplo-paper-2020-/all_pheno_res.tsv')
 #~ burnin     <- F
 #~ testsonly  <- T
-#~ phenotypeall <- F
-#~ kind <- c('block', 'complete', 'single')
-#~ kind <- c('block')
+#~ phenotypeall <- T
+#~ kind <- c('single')
                     
 # Do some pre-interpretations
 if (burnin) {mask_pipe=pipe[1:7]}
 if (testsonly) {mask_pipe=pipe[c(5, 6, 8)]}
-if (phenotypeall) {cat(sprint("--phenotypeall set. All phenotypes will be considered"))}
+if (phenotypeall) {cat(sprintf("--phenotypeall set. All phenotypes will be considered\n"))}
 
 
 
 if (TRUE){
-    cat(sprintf("Parameters: chrom=%d\n            pheno=%s\nSetup:\tsave=%s\tstartrun=%s\tnb_core=%d\tkind=%s\n\n",
-        chromosome, phenotype_fpath, save, startrun, nb_core, kind)
+    cat(sprintf("Parameters: chrom=%d\n            pheno=%s\nSetup:\tsave=%s\tstartrun=%s\tnb_core=%d\n\n",
+        chromosome, phenotype_fpath, save, startrun, nb_core)
         )
     }
 
@@ -162,7 +161,7 @@ output_haplo_dir = file.path(output_root, 'haps')
 if ("Haplotype calling" %in% mask_pipe) {dir.create(output_haplo_dir, showWarnings=F, recursive=T)}
 
 output_test_dir = file.path(output_root, 'tests')
-invisible(lapply(kind, function(i) {
+invisible(lapply(c("block", "single", "complete"), function(i) {
     if (save) { dir.create(file.path(output_test_dir,i), showWarnings=F, recursive=T)}
 }))
 ########################################################################
@@ -427,8 +426,8 @@ if (!("hap" %in% ls())) {
         hap = load_haplotypes(chromosome=sprintf('chr%d', chromosome), output_haplo_dir)
     },
     error = function(error_condition) {
-        fp = file.path(output_haplo_dir, sprintf('chr%d', chromosome))
-        cat(sprintf("Cannot read procomputed haplotypes from %s", fp))
+        fp = file.path(output_haplo_dir, sprintf('haplotype_chr%d', chromosome))
+        cat(sprintf("Cannot read precomputed haplotypes from %s", fp))
     }
     )
 }
@@ -440,80 +439,67 @@ haplo.end = na.omit(unique(vapply(strsplit(colnames(hap),"_"), `[`, 3, FUN.VALUE
 haplo.blocks = sprintf('chr%d_%s_%s', chromosome, haplo.start, haplo.end)
 haplo.names = colnames(hap)
 
-
-
-# Now inited from optarg : 
-# kind = c("block", "single", "complete")
+# kind is an input parameter (optparse)
 outkind = lapply(kind, function(p) file.path(output_test_dir, p))
 phe_outkind = lapply(outkind, function(p) file.path(p, list_col_phenotype))
 names(phe_outkind) = names(outkind) = kind
 for (k in kind){names(phe_outkind[[k]])=list_col_phenotype} 
+ocol=c('start','end','haplotype','p_value','nb_subjects','nb_haplotypes')
 
-#if (STOP){}
-
+#if (STOP) {}
 if (startrun) {
     dryrun.nb_subj = 1000
     
     for (k in kind){
-        for (col_phenotype in list_col_phenotype) {
-            test= do.call(rbind,
-                         mcmapply(
-                            FUN=lm_test_haplotypes,
-                            X=lapply(haplo.blocks, function(b) hap[1:dryrun.nb_subj,startsWith(haplo.names, b)]),
-                            MoreArgs=list(
-                                Y=as.data.frame(phenotype)[1:dryrun.nb_subj, col_phenotype, drop=FALSE],
-                                kind=k),
-                           mc.cores=nb_core
-                           )
-                        )
-            rownames(test) = c()
-            if (save){
-                dir.create(phe_outkind[[k]][[col_phenotype]], showWarnings=F, recursive=T)
-                save_tests(test, chromosome, phe_outkind[[k]][[col_phenotype]])
-            }
+        substart.time <- Sys.time()
+        test= do.call(rbind,
+                     mcmapply(
+                        FUN=lm_par_test_haplotypes,
+                        X=lapply(haplo.blocks, function(b) hap[1:dryrun.nb_subj,startsWith(haplo.names, b)]),
+                        MoreArgs=list(
+                            Y=as.data.frame(phenotype)[1:dryrun.nb_subj, list_col_phenotype, drop=FALSE],
+                            kind=k),
+                       mc.cores=nb_core
+                       )
+                    )
+        rownames(test) = c()
+        if (save){
+            invisible(lapply(phe_outkind[[k]], dir.create, showWarnings=F, recursive=T))
+            for (ph in list_col_phenotype){
+                cat(sprintf("\t...Writing %s for chrom %d\n",phe_outkind[[k]][[ph]], chromosome))                
+                save_tests(test[which(test$test==k & test$phname==ph),ocol],
+                       chromosome, phe_outkind[[k]][[ph]])
+                   }
+        subend.time <- Sys.time()
+        cat(sprintf("\t...Tests %s in %s sec.\n",k, subend.time-substart.time))
         }
     }
 } else {
     for (k in kind){
-        for (col_phenotype in list_col_phenotype) {
-            test= do.call(rbind,
-                         mcmapply(
-                            FUN=lm_test_haplotypes,
-                            X=lapply(haplo.blocks, function(b) hap[,startsWith(haplo.names, b)]),
-                            MoreArgs=list(
-                                Y=as.data.frame(phenotype)[, col_phenotype, drop=FALSE],
-                                kind=k),
-                           mc.cores=nb_core
-                           )
-                        )
-            rownames(test) = c()
-            if (save){
-                dir.create(phe_outkind[[k]][[col_phenotype]], showWarnings=F, recursive=T)
-                save_tests(test, chromosome, phe_outkind[[k]][[col_phenotype]])
-            }
+        substart.time <- Sys.time()
+        test= do.call(rbind,
+                     mcmapply(
+                        FUN=lm_par_test_haplotypes,
+                        X=lapply(haplo.blocks, function(b) hap[,startsWith(haplo.names, b)]),
+                        MoreArgs=list(
+                            Y=as.data.frame(phenotype)[, list_col_phenotype, drop=FALSE],
+                            kind=k),
+                       mc.cores=nb_core
+                       )
+                    )
+        rownames(test) = c()
+        if (save){
+            invisible(lapply(phe_outkind[[k]], dir.create, showWarnings=F, recursive=T))
+            for (ph in list_col_phenotype){
+                cat(sprintf("\t...Writing %s for chrom %d\n",phe_outkind[[k]][[ph]], chromosome))
+                save_tests(test[which(test$test==k & test$phname==ph),ocol],
+                       chromosome, phe_outkind[[k]][[ph]])
+                   }
         }
+        subend.time <- Sys.time()
+        cat(sprintf("\t...Tests %s in %s sec.\n",k, subend.time-substart.time))
     }
 }
-
-#~         test= do.call(rbind,
-#~                      mcmapply(
-#~                         FUN=lm_test_haplotypes,
-#~                         X=lapply(haplo.blocks, function(b) hap[,startsWith(haplo.names, b)]),
-#~                         MoreArgs=list(
-#~                             Y=as.data.frame(phenotype)[, list_col_phenotype, drop=FALSE],
-#~                             kind=k),
-#~                        mc.cores=nb_core
-#~                        )
-#~                     )
-#~         rownames(test) = c()
-#~         if (save){
-#~             phe_outkind = lapply(outkind, function(p) file.path(p, list_col_phenotype))
-#~             dir.create(phe_outkind[[k]], showWarnings=F, recursive=T)
-#~             for (ph in list_col_phenotype){
-#~                 save_tests(test[which(test$test==k & test$phname==ph),],
-#~                        chromosome, phe_outkind[[k]])
-#~                    }
-#~         }
 
 
 ## summary for this step
@@ -521,3 +507,4 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 cat(sprintf("Step %s in %s sec.\n",pipe.step, time.taken))
 }
+
