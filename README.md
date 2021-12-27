@@ -6,11 +6,13 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-gwhap, the Genome-Wide HAPlotype analysis package 
+gwhap, the Genome-Wide HAPlotype analysis package
+
+The gwhap software is related to the following paper : https://www.nature.com/articles/s41431-021-00827-8 
 
 ## Installation with a singularity container DURING development cycles
 
-1.  get the brainomics singularity [container](https://bioproj.cea.fr/nextcloud/apps/files/?dir=/PartageBrainomics&fileid=78864) which has devetools and IRkernels.
+1.  get a singularity that has devetools and IRkernels.
 2.  get a clone of the gwhap gitlab project
 3.  organize your directories to reflect the following envir varaibles (where is singularity and in which dir is gwhap.):
 
@@ -86,5 +88,3 @@ description and full documentation :
 library(help="gwhap")
 
 ```
-
-
